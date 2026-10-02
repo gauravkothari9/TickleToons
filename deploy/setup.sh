@@ -2,13 +2,14 @@
 # Tickle Toons server setup for its own fresh Ubuntu 24.04 server (AWS EC2).
 #
 #   sudo bash deploy/setup.sh <hostname> [site-url]
-#   e.g. sudo bash deploy/setup.sh tickletoons.1-2-3-4.sslip.io https://tickle-toons.vercel.app
+#   e.g. sudo bash deploy/setup.sh tickletoons.1-2-3-4.sslip.io
 #
 # Installs Python + edge-tts (voices), FFmpeg (video export) and Caddy (automatic HTTPS), and runs
-# server.py as a systemd service on 127.0.0.1:8000 behind Caddy. Only the server lives here: the pages
-# live on Vercel (site-url) and call this server directly. The server asks for a login (REQUIRE_LOGIN=1):
+# server.py (the pages and the API) as a systemd service on 127.0.0.1:8000 behind Caddy. site-url is only
+# needed if the pages are hosted somewhere else; by default they come from this server. The server asks for a login (REQUIRE_LOGIN=1):
 # the first visit to the login page sets the password.
-# A second service, tickletoons-renderer, runs a headless Chromium that opens the pages' worker.html
+# A second service, tickletoons-renderer, runs a headless Chromium that opens worker.html (straight from
+# server.py, not through the internet)
 # and renders the planned episodes, so videos are made and uploaded while your laptop is off.
 # Safe to run again after updates.
 set -euo pipefail
@@ -39,8 +40,8 @@ if ! command -v caddy >/dev/null; then
 fi
 
 echo "==> Python environment"
-# only the server lives here now: pages, sound files and story tools from older installs go
-rm -rf "$APP_DIR/web" "$APP_DIR/tools" "$APP_DIR/stories" "$APP_DIR/README.md" "$APP_DIR/deploy/login.txt"
+# story-writing tools are not needed on the server
+rm -rf "$APP_DIR/tools" "$APP_DIR/stories" "$APP_DIR/README.md" "$APP_DIR/deploy/login.txt"
 chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 sudo -u "$APP_USER" -H bash -c "cd '$APP_DIR' && { [[ -x .venv/bin/python ]] || python3 -m venv .venv; } && .venv/bin/pip install -q -r requirements.txt playwright"
 
@@ -80,7 +81,7 @@ Wants=tickletoons.service
 [Service]
 User=$APP_USER
 WorkingDirectory=$APP_DIR
-Environment=SITE_URL=$SITE_URL
+Environment=SITE_URL=http://127.0.0.1:8000
 Environment=PYTHONUNBUFFERED=1
 ExecStart=$APP_DIR/.venv/bin/python deploy/render_worker.py
 Restart=always

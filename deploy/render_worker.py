@@ -38,7 +38,11 @@ def one_episode(p, key):
         page.add_init_script(f"try {{ localStorage.setItem('tt-login', {json.dumps(key)}); }} catch (e) {{}}")
         page.on("console", lambda m: log(m.text) if "[worker]" in m.text or m.type == "error" else None)
         page.on("pageerror", lambda e: log(f"page error: {e}"))
-        page.goto(f"{SITE_URL}/worker.html", wait_until="load", timeout=120_000)
+        res = page.goto(f"{SITE_URL}/worker.html", wait_until="load", timeout=120_000)
+        if not res or not res.ok:
+            raise RuntimeError(f"{SITE_URL}/worker.html answered {res.status if res else 'nothing'} (are the pages deployed?)")
+        # the script sets workerResult = null as soon as it runs; if it never does, it failed to load
+        page.wait_for_function("'workerResult' in window", timeout=120_000)
         page.wait_for_function("window.workerResult", timeout=ONE_VIDEO_LIMIT, polling=5000)
         return page.evaluate("window.workerResult") or {}
     finally:

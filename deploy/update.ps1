@@ -1,11 +1,11 @@
-# Push the code to the Tickle Toons server (AWS) and restart it. The pages deploy separately (Vercel, from GitHub).
+# Push the code (pages + server) to the Tickle Toons server on AWS and restart it.
 #   powershell -ExecutionPolicy Bypass -File deploy\update.ps1
 # The server is created by `node deploy\aws-provision.mjs`; the app lives in ~/tickletoons.
 # The server keeps its own videos, data (including the login password) and voice cache.
 $ErrorActionPreference = 'Continue'  # ssh and scp print notes on stderr; failures are checked with $LASTEXITCODE
 $Server = 'ubuntu@13.205.130.104'
 $HostName = 'tickletoons.13-205-130-104.sslip.io'   # the server (Caddy HTTPS)
-$SiteUrl = 'https://tickle-toons.vercel.app'        # the pages on Vercel
+$SiteUrl = "https://$HostName"                     # the pages come from the same server
 $Key = "$env:USERPROFILE\.ssh\tickletoons.pem"
 $opt = @('-i', $Key, '-o', 'ConnectTimeout=20', '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=accept-new')
 $root = Split-Path $PSScriptRoot -Parent
@@ -17,14 +17,14 @@ try {
         throw "Cannot SSH to $Server. If your home IP changed (now $ip), re-run node deploy\aws-provision.mjs (it adds the new IP to the firewall)."
     }
     $out = 'tickletoons-update.tar.gz'
-    tar -czf $out --exclude=__pycache__ server.py youtube.py requirements.txt deploy   # the server only; pages are on Vercel
+    tar -czf $out --exclude=__pycache__ server.py youtube.py requirements.txt web deploy
     & ssh @opt $Server 'mkdir -p ~/tickletoons'
     & scp @opt $out "${Server}:~/"
     if ($LASTEXITCODE -ne 0) { throw 'Upload failed' }
     Remove-Item $out -Force
     & ssh @opt $Server "tar -xzf ~/$out -C ~/tickletoons && rm ~/$out && cd ~/tickletoons && sudo bash deploy/setup.sh $HostName $SiteUrl"
     if ($LASTEXITCODE -ne 0) { throw 'Remote setup failed (see output above)' }
-    Write-Host "`nServer updated: https://$HostName (pages: $SiteUrl)" -ForegroundColor Green
+    Write-Host "`nTickle Toons updated: https://$HostName" -ForegroundColor Green
 } finally {
     Pop-Location
 }

@@ -54,6 +54,10 @@ that place for the scenes after it. Story props (rotis, rolling pin, TV remote, 
 stand, ludo board, volcano…) live in `web/js/engine/props-story.js`. Weddings: Pandit-ji, bride/groom outfits, mandap and reception venues, varmala, kalash, diya, dhol and more.
 Every line is written in English and Hindi; to add a language, add its text to each line and a voice per character.
 
+## Online
+
+Everything (pages and server) can run on one AWS server, with a password login set on the first visit. It keeps rendering and uploading the planned episodes while your PC is off. See `deploy/DEPLOY.md`.
+
 ## Run
 
 Double-click **`start.bat`**. The first run creates `.venv` and installs `edge-tts` (for voices).
