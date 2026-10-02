@@ -565,7 +565,7 @@ function renderYouTube() {
     <div class="section">
       <h3>Your channel</h3>
       ${yt.connected ? `<p>✅ Connected: <b>${esc(yt.channel?.title || '')}</b></p><button class="btn small" data-act="yt-disconnect">Disconnect</button>`
-        : yt.configured ? '<p>Google app saved. Now sign in with the Google account that owns your channel:</p><a class="btn primary small" href="${serverUrl('/api/youtube/connect')}">Connect my channel</a>'
+        : yt.configured ? `<p>Google app saved. Now sign in with the Google account that owns your channel:</p><a class="btn primary small" href="${serverUrl('/api/youtube/connect')}">Connect my channel</a>`
           : '<p class="muted">Not connected yet. One-time setup below (about 10 minutes).</p>'}
     </div>
     <div class="section">

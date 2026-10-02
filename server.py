@@ -445,12 +445,15 @@ class Handler(SimpleHTTPRequestHandler):
             return auth[7:].strip()
         return parse_qs(urlparse(self.path).query).get("k", [""])[0]  # video players and links can't send headers
 
+    def signed_in(self):
+        token = self.token()
+        return token_ok(token) or bool(token and hmac.compare_digest(token, worker_key()))
+
     def locked(self, path):
         """True (and answers 401) when this request needs a login it doesn't have."""
         if not REQUIRE_LOGIN or not path.startswith(("/api/", "/media/", "/tts/")) or path.startswith(("/api/auth", "/api/youtube/callback")):
             return False
-        token = self.token()
-        if token_ok(token) or (token and hmac.compare_digest(token, worker_key())):
+        if self.signed_in():
             return False
         self.send_json({"error": "Please log in.", "login": True}, 401)
         return True
@@ -458,7 +461,7 @@ class Handler(SimpleHTTPRequestHandler):
     def auth_routes(self, path):
         if path == "/api/auth" and self.command == "GET":
             return self.send_json({"required": REQUIRE_LOGIN, "passwordSet": bool(load_auth().get("hash")),
-                                   "ok": not REQUIRE_LOGIN or token_ok(self.token())})
+                                   "ok": not REQUIRE_LOGIN or self.signed_in()})
         password = str((self.read_json() or {}).get("password") or "")
         if path == "/api/auth/setup":
             if len(password) < 6:
