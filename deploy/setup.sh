@@ -94,9 +94,11 @@ CPUWeight=50
 WantedBy=multi-user.target
 UNIT
 systemctl daemon-reload
-systemctl enable tickletoons tickletoons-renderer >/dev/null
+systemctl enable tickletoons >/dev/null
 systemctl restart tickletoons
-systemctl restart tickletoons-renderer
+# The renderer is installed but off: without a graphics card a render takes hours. Turn it on with
+#   sudo systemctl enable --now tickletoons-renderer
+if systemctl is-enabled --quiet tickletoons-renderer; then systemctl restart tickletoons-renderer; fi
 
 echo "==> Caddy site for https://$HOST"
 mkdir -p /etc/caddy/sites

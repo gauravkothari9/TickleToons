@@ -20,10 +20,12 @@ On this PC (`start.bat`) there is no login.
 
 ## Works while your laptop is off
 
-- **Rendering:** the `tickletoons-renderer` service runs a headless Chromium on the server. It opens `worker.html`,
-  takes the next planned episode from the Series plan (soonest publish time first), renders it and saves the video.
-  You only need the browser to plan episodes (Series → Generate episodes). Graphics run on the CPU here, so it is
-  slower than a laptop with a graphics card.
+- **Rendering happens in your browser** (Series → Render all), because it needs a graphics card. The frames go
+  straight to this server, which makes the MP4. Render a batch ahead of time (e.g. a week of episodes), then the
+  laptop can be off.
+- The `tickletoons-renderer` service (a headless Chromium on the server that renders planned episodes by itself) is
+  installed but **off**: this server has no graphics card, and a test took over 15 minutes for 3 seconds of video.
+  It only makes sense on a GPU instance. Turn it on with `sudo systemctl enable --now tickletoons-renderer`.
 - **Uploading:** with **auto-upload** on and YouTube connected, each rendered episode is queued and uploaded by the
   server. Scheduled episodes go up as private with a publish time, and YouTube makes them public at that time.
 - An episode that fails 3 times is marked failed; fix it on the Series page and it is tried again.
