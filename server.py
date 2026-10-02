@@ -326,6 +326,88 @@ def check_password(password):
     return None
 
 
+# ---------- the server's own renderer (deploy/render_worker.py) ----------
+# A headless browser on the server opens the pages' worker.html, which asks for the next planned
+# episode (claim), renders it exactly like the Series page does, and reports back (done). So episodes
+# get made and uploaded while every laptop is off. It signs in with data/worker.key.
+WORKER_KEY_FILE = DATA / "worker.key"
+CLAIM_HOURS = 8          # a render that hasn't reported back by then is tried again
+MAX_SERVER_TRIES = 3
+
+
+def worker_key():
+    if not WORKER_KEY_FILE.exists():
+        WORKER_KEY_FILE.write_text(secrets.token_urlsafe(32), encoding="utf-8")
+    return WORKER_KEY_FILE.read_text(encoding="utf-8").strip()
+
+
+def load_series():
+    try:
+        data = json.loads(SERIES_FILE.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def save_series(data):
+    data["rev"] = max(int(time.time() * 1000), int(data.get("rev") or 0) + 1)
+    tmp = SERIES_FILE.with_suffix(".tmp")
+    tmp.write_text(json.dumps(data), encoding="utf-8")
+    tmp.replace(SERIES_FILE)
+
+
+def same_episode(a, b):
+    return all(a.get(k) == b.get(k) for k in ("key", "seed", "template", "lang", "kind"))
+
+
+def keep_server_progress(new, old):
+    """A Series page that was opened before the server rendered something must not undo it on save."""
+    olds = {i.get("key"): i for i in old.get("plan") or [] if isinstance(i, dict)}
+    for it in new.get("plan") or []:
+        o = olds.get(it.get("key")) if isinstance(it, dict) else None
+        if not o or not same_episode(it, o) or it.get("videoId"):
+            continue
+        if o.get("videoId"):
+            it.update(videoId=o["videoId"], status=o.get("status", "rendered"), error=None)
+        elif o.get("serverClaim") and time.time() - o["serverClaim"] < CLAIM_HOURS * 3600:
+            it.update(status="rendering", serverClaim=o["serverClaim"])
+        for k in ("serverTries", "serverError"):
+            if k in o:
+                it[k] = o[k]
+
+
+def claim_episode():
+    """Pick the next planned episode to render (soonest publish time first) and mark it as taken."""
+    with series_lock:
+        data = load_series()
+        now = time.time()
+        free = [it for it in data.get("plan") or [] if isinstance(it, dict) and it.get("story") and not it.get("videoId")
+                and it.get("serverTries", 0) < MAX_SERVER_TRIES
+                and not (it.get("status") == "rendering" and now - (it.get("serverClaim") or now) < CLAIM_HOURS * 3600)]
+        if not free:
+            return None, data
+        it = min(free, key=lambda i: (i.get("publishAt") or "9999", data["plan"].index(i)))
+        it.update(status="rendering", serverClaim=now)
+        save_series(data)
+        return it, data
+
+
+def finish_episode(key, seed, video_id=None, error=None):
+    with series_lock:
+        data = load_series()
+        it = next((i for i in data.get("plan") or [] if i.get("key") == key and i.get("seed") == seed), None)
+        if not it:
+            return False
+        it.pop("serverClaim", None)
+        if video_id:
+            it.update(videoId=video_id, status="rendered", error=None)
+        else:
+            it["serverTries"] = it.get("serverTries", 0) + 1
+            it.update(status="failed" if it["serverTries"] >= MAX_SERVER_TRIES else "planned", error=str(error or "")[:300])
+        save_series(data)
+        return True
+
+
 class Handler(SimpleHTTPRequestHandler):
     extensions_map = {**SimpleHTTPRequestHandler.extensions_map, ".js": "text/javascript",
                       ".mjs": "text/javascript", ".glb": "model/gltf-binary"}
@@ -367,7 +449,8 @@ class Handler(SimpleHTTPRequestHandler):
         """True (and answers 401) when this request needs a login it doesn't have."""
         if not REQUIRE_LOGIN or not path.startswith(("/api/", "/media/", "/tts/")) or path.startswith(("/api/auth", "/api/youtube/callback")):
             return False
-        if token_ok(self.token()):
+        token = self.token()
+        if token_ok(token) or (token and hmac.compare_digest(token, worker_key())):
             return False
         self.send_json({"error": "Please log in.", "login": True}, 401)
         return True
@@ -522,6 +605,8 @@ class Handler(SimpleHTTPRequestHandler):
             return self.send_media(*route)
         if path.startswith("/api/"):
             return self.send_json({"error": "Not found"}, 404)
+        if not WEB.is_dir():  # server-only install: the pages are hosted elsewhere
+            return self.redirect(FRONTEND_URL + path) if FRONTEND_URL else self.send_json({"error": "Not found"}, 404)
         return super().do_GET()
 
     def do_HEAD(self):
@@ -555,17 +640,25 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json({"error": "Bad series data"}, 400)
             with series_lock:
                 # saves can arrive out of order; never let an older one overwrite a newer one
-                try:
-                    old_rev = json.loads(SERIES_FILE.read_text(encoding="utf-8")).get("rev", 0)
-                except (OSError, ValueError, AttributeError):
-                    old_rev = 0
+                old = load_series()
+                old_rev = old.get("rev", 0)
                 rev = data.get("rev", 0)
                 if isinstance(rev, (int, float)) and isinstance(old_rev, (int, float)) and rev < old_rev:
                     return self.send_json({"ok": True, "stale": True})
+                keep_server_progress(data, old)
                 tmp = SERIES_FILE.with_suffix(".tmp")
                 tmp.write_text(json.dumps(data), encoding="utf-8")
                 tmp.replace(SERIES_FILE)
             return self.send_json({"ok": True})
+
+        if path == "/api/worker/claim":
+            it, data = claim_episode()
+            return self.send_json({"item": it, "youtube": data.get("youtube") or {}, "connected": YT.status()["connected"]})
+
+        if path == "/api/worker/done":
+            d = self.read_json() or {}
+            ok = finish_episode(d.get("key"), d.get("seed"), d.get("videoId"), d.get("error"))
+            return self.send_json({"ok": ok}, 200 if ok else 404)
 
         if path == "/api/youtube/client":
             data = self.read_json() or {}
@@ -666,6 +759,7 @@ def main():
             full.update(status="failed", note="Server stopped during render.")
             write_meta(meta["id"], full)
 
+    worker_key()  # made once; deploy/render_worker.py signs in with it
     server = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
     url = f"http://127.0.0.1:{PORT}"
     print(f"Tickle Toons Studio running at {url}")

@@ -17,7 +17,7 @@ try {
         throw "Cannot SSH to $Server. If your home IP changed (now $ip), re-run node deploy\aws-provision.mjs (it adds the new IP to the firewall)."
     }
     $out = 'tickletoons-update.tar.gz'
-    tar -czf $out --exclude=__pycache__ server.py youtube.py requirements.txt README.md web tools stories deploy
+    tar -czf $out --exclude=__pycache__ server.py youtube.py requirements.txt deploy   # the server only; pages are on Vercel
     & ssh @opt $Server 'mkdir -p ~/tickletoons'
     & scp @opt $out "${Server}:~/"
     if ($LASTEXITCODE -ne 0) { throw 'Upload failed' }
