@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tickle Toons · Log in</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .login-wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+    .login { width: 100%; max-width: 380px; background: var(--panel); border: 2px solid var(--line); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 28px 24px; display: grid; gap: 14px; }
+    .login .logo { justify-content: center; margin-bottom: 4px; }
+    .login h1 { margin: 0; font-size: 1.4rem; text-align: center; }
+    .login p { margin: 0; color: var(--muted); text-align: center; font-size: .95rem; }
+    .login input { width: 100%; padding: 12px 14px; border: 2px solid var(--line); border-radius: 12px; background: var(--bg); }
+    .login input:focus { outline: none; border-color: var(--pink); }
+    .login .btn { width: 100%; justify-content: center; }
+    .login .error { color: var(--danger); min-height: 1.2em; text-align: center; font-size: .9rem; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="login-wrap">
+    <form id="form" class="login" autocomplete="on">
+      <div class="logo"><span class="logo-mark">☺</span><span>Tickle <span class="accent">Toons</span></span></div>
+      <h1 id="heading">Log in</h1>
+      <p id="hint">Checking the server…</p>
+      <input id="password" type="password" placeholder="Password" autocomplete="current-password" required minlength="6" disabled>
+      <input id="confirm" type="password" placeholder="Type it again" autocomplete="new-password" minlength="6" hidden>
+      <button id="go" class="btn primary" type="submit" disabled>Log in</button>
+      <div id="error" class="error" role="alert"></div>
+    </form>
+  </main>
+  <script type="module" src="js/login.js"></script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 // Audio: generated film-style music, character voices (from the Python server),
 // lip-sync envelopes, live playback and the offline mixdown used for final renders.
 import { rng } from './util.js';
+import { api } from '../api.js';
 import { animalMode, splitCalls, signatureCalls, renderCalls } from './animals.js';
 import { vocalMode, splitVocals, introVocal, renderVocal, renderAnimal, VOCAL_FACE } from './vocals.js';
 
@@ -489,13 +490,13 @@ export class VoiceLibrary {
     const key = JSON.stringify([voice, pitch, rate, text]);
     if (!this.clips.has(key)) {
       const p = (async () => {
-        const res = await fetch('/api/tts', {
+        const res = await api('/api/tts', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text, voice, pitch, rate }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'voice failed');
-        const bytes = await (await fetch(data.url)).arrayBuffer();
+        const bytes = await (await api(data.url)).arrayBuffer();
         return decoder().decodeAudioData(bytes);
       })();
       p.catch(() => this.clips.delete(key));

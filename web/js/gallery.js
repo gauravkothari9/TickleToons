@@ -1,3 +1,5 @@
+import { api, serverUrl, requireLogin } from './api.js';
+requireLogin();
 const grid = document.getElementById('grid');
 const count = document.getElementById('count');
 const player = document.getElementById('player');
@@ -7,13 +9,13 @@ let current = null;
 let pollTimer = null;
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const mediaUrl = (v, file = v.file) => `/media/${v.id}/${file}`;
+const mediaUrl = (v, file = v.file, dl) => serverUrl(`/media/${v.id}/${file}${dl ? `?dl=${encodeURIComponent(dl)}` : ''}`);
 const fmtDate = (s) => new Date(s * 1000).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 const fmtDur = (d) => (d ? `${Math.round(d)}s` : '');
 
 async function load() {
   try {
-    const res = await fetch('/api/videos');
+    const res = await api('/api/videos');
     videos = await res.json();
   } catch {
     count.textContent = 'Could not reach the server. Is server.py running?';
@@ -70,8 +72,8 @@ function open(v) {
   document.getElementById('player-meta').textContent =
     `${fmtDate(v.created)} · ${v.aspect || ''} ${v.duration ? '· ' + fmtDur(v.duration) : ''}${v.note ? ' · ' + v.note : ''}`;
   const dl = document.getElementById('btn-download');
-  dl.href = mediaUrl(v);
   dl.download = `${v.title.replace(/[^\w\- ]+/g, '').trim() || 'toon'}.${v.file.split('.').pop()}`;
+  dl.href = mediaUrl(v, v.file, dl.download); // the server names the file (download= is ignored across sites)
   document.getElementById('btn-remix').href = `studio.html?remix=${v.id}`;
   player.classList.add('open');
   history.replaceState(null, '', `?v=${v.id}`);
@@ -93,7 +95,7 @@ grid.addEventListener('click', (e) => {
   const v = videos.find((x) => x.id === card.dataset.id);
   if (v && v.status === 'ready') open(v);
   else if (v && v.status === 'failed' && confirm(`"${v.title}" failed to render${v.note ? ` (${v.note})` : ''}. Delete it?`)) {
-    fetch(`/api/videos/${v.id}`, { method: 'DELETE' }).then(load);
+    api(`/api/videos/${v.id}`, { method: 'DELETE' }).then(load);
   }
 });
 grid.addEventListener('keydown', (e) => {
@@ -105,7 +107,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && current)
 
 document.getElementById('btn-delete').addEventListener('click', async () => {
   if (!current || !confirm(`Delete "${current.title}"? This can't be undone.`)) return;
-  await fetch(`/api/videos/${current.id}`, { method: 'DELETE' });
+  await api(`/api/videos/${current.id}`, { method: 'DELETE' });
   close();
   load();
 });

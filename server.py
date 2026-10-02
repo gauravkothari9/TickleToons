@@ -9,9 +9,11 @@ Run:  start.bat   (or: .venv\\Scripts\\python server.py)   then open http://127.
 """
 import asyncio
 import hashlib
+import hmac
 import json
 import os
 import re
+import secrets
 import shutil
 import subprocess
 import sys
@@ -268,6 +270,62 @@ def cancel_render(vid):
         job["log"].close()
 
 
+# ---------- login ----------
+# On a public server (REQUIRE_LOGIN=1) everything under /api, /media and /tts needs a login token.
+# The first visit sets the password; after that the same password signs in. Only a salted hash is
+# kept (data/auth.json). Tokens are signed with a secret that changes with the password, so a new
+# password signs every device out. The web pages themselves are public (they hold no data).
+REQUIRE_LOGIN = os.environ.get("REQUIRE_LOGIN") == "1"
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "").rstrip("/")  # where the pages live (Vercel), for redirects
+AUTH_FILE = DATA / "auth.json"
+TOKEN_DAYS = 30
+auth_lock = threading.Lock()
+
+
+def load_auth():
+    try:
+        return json.loads(AUTH_FILE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def hash_password(password, salt):
+    return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), bytes.fromhex(salt), 200_000).hex()
+
+
+def make_token(secret):
+    exp = int(time.time()) + TOKEN_DAYS * 86400
+    return f"{exp}.{hmac.new(secret.encode(), str(exp).encode(), hashlib.sha256).hexdigest()}"
+
+
+def token_ok(token):
+    secret = load_auth().get("secret")
+    exp, _, sig = (token or "").partition(".")
+    if not secret or not exp.isdigit() or int(exp) < time.time():
+        return False
+    return hmac.compare_digest(sig, hmac.new(secret.encode(), exp.encode(), hashlib.sha256).hexdigest())
+
+
+def set_first_password(password):
+    """Only works once, while no password exists. Returns a token, or None if one is already set."""
+    with auth_lock:
+        if load_auth().get("hash"):
+            return None
+        salt, secret = secrets.token_hex(16), secrets.token_hex(32)
+        tmp = AUTH_FILE.with_suffix(".tmp")
+        tmp.write_text(json.dumps({"salt": salt, "hash": hash_password(password, salt), "secret": secret}), encoding="utf-8")
+        tmp.replace(AUTH_FILE)
+        return make_token(secret)
+
+
+def check_password(password):
+    auth = load_auth()
+    if auth.get("hash") and hmac.compare_digest(hash_password(password, auth["salt"]), auth["hash"]):
+        return make_token(auth["secret"])
+    time.sleep(1)  # slows down guessing
+    return None
+
+
 class Handler(SimpleHTTPRequestHandler):
     extensions_map = {**SimpleHTTPRequestHandler.extensions_map, ".js": "text/javascript",
                       ".mjs": "text/javascript", ".glb": "model/gltf-binary"}
@@ -286,7 +344,48 @@ class Handler(SimpleHTTPRequestHandler):
         if not getattr(self, "_cache_set", False):
             super().send_header("Cache-Control", "no-cache")
         self._cache_set = False
+        # the pages may be hosted elsewhere (Vercel) and call this server directly; the login token
+        # travels in a header, not a cookie, so any origin may ask
+        super().send_header("Access-Control-Allow-Origin", "*")
         super().end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Methods", "GET, HEAD, POST, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type, Range")
+        self.send_header("Access-Control-Max-Age", "86400")
+        self.end_headers()
+
+    # ---------- login ----------
+    def token(self):
+        auth = self.headers.get("Authorization") or ""
+        if auth.startswith("Bearer "):
+            return auth[7:].strip()
+        return parse_qs(urlparse(self.path).query).get("k", [""])[0]  # video players and links can't send headers
+
+    def locked(self, path):
+        """True (and answers 401) when this request needs a login it doesn't have."""
+        if not REQUIRE_LOGIN or not path.startswith(("/api/", "/media/", "/tts/")) or path.startswith(("/api/auth", "/api/youtube/callback")):
+            return False
+        if token_ok(self.token()):
+            return False
+        self.send_json({"error": "Please log in.", "login": True}, 401)
+        return True
+
+    def auth_routes(self, path):
+        if path == "/api/auth" and self.command == "GET":
+            return self.send_json({"required": REQUIRE_LOGIN, "passwordSet": bool(load_auth().get("hash")),
+                                   "ok": not REQUIRE_LOGIN or token_ok(self.token())})
+        password = str((self.read_json() or {}).get("password") or "")
+        if path == "/api/auth/setup":
+            if len(password) < 6:
+                return self.send_json({"error": "Use at least 6 characters."}, 400)
+            token = set_first_password(password)
+            return self.send_json({"token": token}) if token else self.send_json({"error": "A password is already set. Log in with it."}, 409)
+        if path == "/api/auth/login":
+            token = check_password(password)
+            return self.send_json({"token": token}) if token else self.send_json({"error": "Wrong password."}, 401)
+        return self.send_json({"error": "Not found"}, 404)
 
     # ---------- helpers ----------
     def send_json(self, data, status=200):
@@ -343,6 +442,8 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(length))
         self.send_header("Accept-Ranges", "bytes")
         self.send_header("Cache-Control", "no-cache")
+        if dl := parse_qs(urlparse(self.path).query).get("dl", [""])[0]:  # "Download" button: save under this name
+            self.send_header("Content-Disposition", f"attachment; filename*=UTF-8''{quote(dl[:120])}")
         if status == 206:
             self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
         self.end_headers()
@@ -381,6 +482,10 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         url = urlparse(self.path)
         path = url.path
+        if path == "/api/auth":
+            return self.auth_routes(path)
+        if self.locked(path):
+            return
         if path == "/api/series":
             try:
                 return self.send_json(json.loads(SERIES_FILE.read_text(encoding="utf-8")))
@@ -394,16 +499,16 @@ class Handler(SimpleHTTPRequestHandler):
             try:
                 return self.redirect(YT.auth_url(self.redirect_uri()))
             except ValueError as exc:
-                return self.redirect(f"/series.html?yt_error={quote(str(exc))}")
+                return self.redirect(f"{FRONTEND_URL}/series.html?yt_error={quote(str(exc))}")
         if path == "/api/youtube/callback":
             q = parse_qs(url.query)
             if q.get("error"):
-                return self.redirect(f"/series.html?yt_error={quote(q['error'][0])}")
+                return self.redirect(f"{FRONTEND_URL}/series.html?yt_error={quote(q['error'][0])}")
             try:
                 YT.finish_auth(q.get("code", [""])[0], q.get("state", [""])[0], self.redirect_uri())
-                return self.redirect("/series.html?yt=connected")
+                return self.redirect(f"{FRONTEND_URL}/series.html?yt=connected")
             except Exception as exc:
-                return self.redirect(f"/series.html?yt_error={quote(str(exc)[:200])}")
+                return self.redirect(f"{FRONTEND_URL}/series.html?yt_error={quote(str(exc)[:200])}")
         if path == "/api/status":
             return self.send_json({"ffmpeg": bool(FFMPEG), "neuralVoices": bool(edge_tts)})
         if path == "/api/voices":
@@ -420,12 +525,18 @@ class Handler(SimpleHTTPRequestHandler):
         return super().do_GET()
 
     def do_HEAD(self):
+        if self.locked(urlparse(self.path).path):
+            return
         if route := self.media_route(urlparse(self.path).path):
             return self.send_media(*route)
         return super().do_HEAD()
 
     def do_POST(self):
         path = urlparse(self.path).path
+        if path.startswith("/api/auth"):
+            return self.auth_routes(path)
+        if self.locked(path):
+            return
 
         if path == "/api/tts":
             data = self.read_json() or {}
@@ -530,6 +641,8 @@ class Handler(SimpleHTTPRequestHandler):
         return self.send_json({"error": "Not found"}, 404)
 
     def do_DELETE(self):
+        if self.locked(urlparse(self.path).path):
+            return
         match = VIDEO_URL.match(urlparse(self.path).path)
         if not match or not (VIDEOS / match[1]).is_dir():
             return self.send_json({"error": "Not found"}, 404)

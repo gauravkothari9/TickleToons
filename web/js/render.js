@@ -1,9 +1,10 @@
 // Turn a story into an MP4 on the server: voices, every frame at full quality, the soundtrack,
 // then FFmpeg. Used by the studio's "Make video" and by the Series page's automatic renders.
 import { renderSoundtrack } from './engine/audio.js';
+import { api } from './api.js';
 
 const FPS = 30;
-const post = (url, body, type) => fetch(url, { method: 'POST', headers: type ? { 'Content-Type': type } : {}, body });
+const post = (url, body, type) => api(url, { method: 'POST', headers: type ? { 'Content-Type': type } : {}, body });
 const toJpeg = (canvas) => new Promise((res) => canvas.toBlob(res, 'image/jpeg', 0.93));
 // MessageChannel isn't throttled like setTimeout when the tab is in the background
 const channel = new MessageChannel();
@@ -58,14 +59,14 @@ export async function renderVideo(stage, voices, story, canvas, opts = {}) {
     step('Encoding MP4…', 95);
     for (;;) {
       await new Promise((r) => setTimeout(r, 1000));
-      const meta = await (await fetch(`/api/videos/${id}`)).json();
+      const meta = await (await api(`/api/videos/${id}`)).json();
       if (meta.status === 'ready') break;
       if (meta.status === 'failed') throw new Error(meta.note || 'encoding failed');
     }
     step('Done!', 100);
     return id;
   } catch (err) {
-    if (id) fetch(`/api/videos/${id}`, { method: 'DELETE' });
+    if (id) api(`/api/videos/${id}`, { method: 'DELETE' }).catch(() => {});
     throw err;
   }
 }

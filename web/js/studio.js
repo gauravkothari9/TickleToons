@@ -1,8 +1,10 @@
+import { api, requireLogin } from './api.js';
 import { Stage } from './engine/stage.js';
 import { VoiceLibrary, playStory, displayText, musicPlan } from './engine/audio.js';
 import { renderVideo } from './render.js';
 import * as S from './story.js';
 import { CharacterPreview } from './preview.js';
+requireLogin(); // off to the login page if the server wants one
 
 const $ = (id) => document.getElementById(id);
 const DRAFT_KEY = 'tickle-toons-story-v2';
@@ -633,11 +635,11 @@ $('btn-cancel').addEventListener('click', () => { if (renderJob) renderJob.cance
 
 // ---------- start ----------
 async function init() {
-  try { voiceList = await (await fetch('/api/voices')).json(); } catch { voiceList = []; }
+  try { voiceList = await (await api('/api/voices')).json(); } catch { voiceList = []; }
   const remix = new URLSearchParams(location.search).get('remix');
   if (remix) {
     try {
-      const meta = await (await fetch(`/api/videos/${remix}`)).json();
+      const meta = await (await api(`/api/videos/${remix}`)).json();
       story = S.normalizeStory(meta.story);
       story.title = `${meta.title} (remix)`;
       history.replaceState(null, '', 'studio.html');

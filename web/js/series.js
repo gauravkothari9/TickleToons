@@ -1,4 +1,5 @@
 // Series Studio: the family bible editor, episode generator, batch renderer, schedule and YouTube.
+import { api, serverUrl, requireLogin } from './api.js';
 import { Stage } from './engine/stage.js';
 import { VoiceLibrary, playStory } from './engine/audio.js';
 import { CharacterPreview } from './preview.js';
@@ -6,6 +7,7 @@ import { renderVideo } from './render.js';
 import { OUTFITS, ACTIONS } from './story.js';
 import { LANGUAGES, LOOKS, FAMILY, mergeBible, castMember, nameOf, DEFAULT_BIBLE } from './series/bible.js';
 import { THEMES, DEFAULT_SETTINGS, makePlan, generateEpisode, scheduleSlots } from './series/generator.js';
+requireLogin(); // off to the login page if the server wants one
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -47,7 +49,7 @@ function flushSave() {
   inFlight++;
   saving = saving.then(async () => {
     try {
-      const res = await fetch('/api/series', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+      const res = await api('/api/series', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `server said ${res.status}`);
     } catch (err) {
       dirty = true; // try again with the next change
@@ -241,9 +243,9 @@ document.addEventListener('click', async (e) => {
     case 'render': return renderQueue([it]);
     case 'render-all': return job ? (job.cancelled = true) : renderQueue(state.plan.filter((p) => !p.videoId));
     case 'upload': return queueUpload(it).then(refreshUploads);
-    case 'retry': await fetch('/api/youtube/retry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: btn.dataset.id }) }); return refreshUploads();
+    case 'retry': await api('/api/youtube/retry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: btn.dataset.id }) }); return refreshUploads();
     case 'yt-save': return saveClient();
-    case 'yt-disconnect': await fetch('/api/youtube/disconnect', { method: 'POST' }); await refreshYouTube(); return renderYouTube();
+    case 'yt-disconnect': await api('/api/youtube/disconnect', { method: 'POST' }); await refreshYouTube(); return renderYouTube();
     case 'forget-stories': state.usedStories = { long: [], short: [] }; save(true); return toast('Story history cleared. Any story can come up again.');
     case 'reset-char': {
       ensureBible();
@@ -376,7 +378,7 @@ async function renderQueue(items) {
 }
 
 async function queueUpload(it) {
-  const res = await fetch('/api/youtube/upload', {
+  const res = await api('/api/youtube/upload', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       videoId: it.videoId, title: it.title, description: it.description, tags: it.tags, language: LANGUAGES[it.lang]?.youtube || it.lang,
@@ -389,7 +391,7 @@ async function queueUpload(it) {
 }
 
 async function refreshUploads() {
-  try { uploads = await (await fetch('/api/youtube/uploads')).json(); } catch { /* server busy */ }
+  try { uploads = await (await api('/api/youtube/uploads')).json(); } catch { /* server busy */ }
   renderPlan();
   if (!$('tab-youtube').hidden) renderYouTube();
 }
@@ -546,10 +548,10 @@ function renderSchedule() {
 
 // ---------- YouTube tab ----------
 async function refreshYouTube() {
-  try { yt = await (await fetch('/api/youtube/status')).json(); } catch { yt = { configured: false, connected: false }; }
+  try { yt = await (await api('/api/youtube/status')).json(); } catch { yt = { configured: false, connected: false }; }
 }
 async function saveClient() {
-  const res = await fetch('/api/youtube/client', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+  const res = await api('/api/youtube/client', { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ clientId: $('yt-id').value, clientSecret: $('yt-secret').value }) });
   const data = await res.json();
   if (!res.ok) return toast(data.error, 'error');
@@ -563,7 +565,7 @@ function renderYouTube() {
     <div class="section">
       <h3>Your channel</h3>
       ${yt.connected ? `<p>✅ Connected: <b>${esc(yt.channel?.title || '')}</b></p><button class="btn small" data-act="yt-disconnect">Disconnect</button>`
-        : yt.configured ? '<p>Google app saved. Now sign in with the Google account that owns your channel:</p><a class="btn primary small" href="/api/youtube/connect">Connect my channel</a>'
+        : yt.configured ? '<p>Google app saved. Now sign in with the Google account that owns your channel:</p><a class="btn primary small" href="${serverUrl('/api/youtube/connect')}">Connect my channel</a>'
           : '<p class="muted">Not connected yet. One-time setup below (about 10 minutes).</p>'}
     </div>
     <div class="section">
@@ -603,9 +605,9 @@ function renderYouTube() {
 
 // ---------- start ----------
 async function init() {
-  try { voiceList = await (await fetch('/api/voices')).json(); } catch { voiceList = []; }
+  try { voiceList = await (await api('/api/voices')).json(); } catch { voiceList = []; }
   try {
-    const saved = await (await fetch('/api/series')).json();
+    const saved = await (await api('/api/series')).json();
     if (saved && saved.settings) state = { ...structuredClone(DEFAULT_STATE), ...saved, settings: { ...DEFAULT_SETTINGS, ...saved.settings }, schedule: { ...DEFAULT_STATE.schedule, ...saved.schedule }, youtube: { ...DEFAULT_STATE.youtube, ...saved.youtube } };
   } catch { /* first run */ }
   // a render cut off by closing the tab can be done again
