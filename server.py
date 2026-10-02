@@ -42,6 +42,7 @@ SERIES_FILE = DATA / "series.json"
 series_lock = threading.Lock()
 
 PORT = int(os.environ.get("PORT", "8000"))
+PUBLIC_URL = os.environ.get("PUBLIC_URL", "").rstrip("/")
 MAX_BODY = 200 * 1024 * 1024
 MEDIA_FILES = {"video.mp4": "video/mp4", "thumb.jpg": "image/jpeg"}
 VIDEO_URL = re.compile(r"^/api/videos/([a-f0-9]{32})$")
@@ -368,7 +369,8 @@ class Handler(SimpleHTTPRequestHandler):
         return None
 
     def redirect_uri(self):
-        return f"http://127.0.0.1:{PORT}/api/youtube/callback"
+        # on a server, PUBLIC_URL is the https address people open (Google must know it as a redirect URI)
+        return f"{PUBLIC_URL or f'http://127.0.0.1:{PORT}'}/api/youtube/callback"
 
     def redirect(self, location):
         self.send_response(302)

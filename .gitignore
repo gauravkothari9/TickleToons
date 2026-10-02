@@ -7,3 +7,7 @@ videos/
 cache/
 # personal data: series plan, upload queue, YouTube OAuth client + tokens
 data/
+
+# server login (user:password), copied to the server by deploy/update.ps1
+deploy/login.txt
+*.tar.gz
