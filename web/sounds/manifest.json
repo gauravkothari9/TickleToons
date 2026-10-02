@@ -1,0 +1,304 @@
+{
+ "baby_coo": [
+  "fs235046.mp3",
+  "fs235072.mp3",
+  "fs416675.mp3",
+  "fs416682.mp3"
+ ],
+ "baby_cry": [
+  "fs240372.mp3",
+  "fs536806.mp3",
+  "fs571420.mp3",
+  "fs668793.mp3"
+ ],
+ "baby_laugh": [
+  "fs260825.mp3",
+  "fs371302.mp3",
+  "fs416702.mp3",
+  "fs458645.mp3"
+ ],
+ "bear_growl": [
+  "fs763026.mp3",
+  "fs77634.mp3",
+  "fs77637.mp3"
+ ],
+ "bunny_sniff": [
+  "fs202101.mp3",
+  "fs827986.mp3"
+ ],
+ "bunny_squeak": [
+  "fs435748.mp3",
+  "fs800274.mp3"
+ ],
+ "cat_hiss": [
+  "fs146963.mp3",
+  "fs485952.mp3",
+  "fs826834.mp3"
+ ],
+ "cat_meow": [
+  "fs110011.mp3",
+  "fs372900.mp3",
+  "fs412017.mp3",
+  "fs448084.mp3",
+  "fs479272.mp3",
+  "fs686775.mp3",
+  "fs732521.mp3"
+ ],
+ "cat_purr": [
+  "fs436542.mp3",
+  "fs528949.mp3",
+  "fs656500.mp3"
+ ],
+ "cat_sad": [
+  "fs156643.mp3",
+  "fs64015.mp3"
+ ],
+ "dog_bark": [
+  "fs277058.mp3",
+  "fs484297.mp3",
+  "fs502655.mp3",
+  "fs583142.mp3",
+  "fs630648.mp3"
+ ],
+ "dog_growl": [
+  "fs270590.mp3",
+  "fs372537.mp3",
+  "fs829986.mp3"
+ ],
+ "dog_happy": [
+  "fs396307.mp3",
+  "fs807270.mp3"
+ ],
+ "dog_whine": [
+  "fs118970.mp3",
+  "fs350593.mp3",
+  "fs735365.mp3"
+ ],
+ "elephant_trumpet": [
+  "fs139052.mp3",
+  "fs510490.mp3",
+  "fs527845.mp3",
+  "fs854137.mp3"
+ ],
+ "fox_yip": [
+  "fs420447.mp3",
+  "fs420449.mp3",
+  "fs420450.mp3",
+  "fs420452.mp3"
+ ],
+ "kid_angry": [
+  "fs800994.mp3"
+ ],
+ "kid_aww": [
+  "fs839993.mp3"
+ ],
+ "kid_cry": [
+  "fs408621.mp3",
+  "fs839991.mp3"
+ ],
+ "kid_gasp": [
+  "fs346198.mp3",
+  "fs363586.mp3",
+  "fs813271.mp3",
+  "fs839996.mp3"
+ ],
+ "kid_giggle": [
+  "fs203230.mp3",
+  "fs209210.mp3",
+  "fs367493.mp3",
+  "fs377742.mp3"
+ ],
+ "kid_laugh": [
+  "fs119450.mp3",
+  "fs135387.mp3",
+  "fs184616.mp3",
+  "fs365632.mp3",
+  "fs402395.mp3",
+  "fs616088.mp3"
+ ],
+ "kid_scream": [
+  "fs219650.mp3",
+  "fs278108.mp3",
+  "fs360465.mp3",
+  "fs400183.mp3"
+ ],
+ "kid_sigh": [
+  "fs377736.mp3",
+  "fs427715.mp3"
+ ],
+ "kid_sniff": [
+  "fs346681.mp3",
+  "fs408622.mp3"
+ ],
+ "kid_yawn": [
+  "fs471859.mp3"
+ ],
+ "kid_yay": [
+  "fs235054.mp3",
+  "fs235083.mp3",
+  "fs241487.mp3"
+ ],
+ "lion_roar": [
+  "fs467762.mp3",
+  "fs567803.mp3",
+  "fs675443.mp3",
+  "fs684527.mp3"
+ ],
+ "man_angry": [
+  "fs341489.mp3",
+  "fs391939.mp3",
+  "fs545203.mp3",
+  "fs801012.mp3"
+ ],
+ "man_chuckle": [
+  "fs166150.mp3",
+  "fs459455.mp3"
+ ],
+ "man_cry": [
+  "fs443791.mp3",
+  "fs494747.mp3",
+  "fs643669.mp3"
+ ],
+ "man_gasp": [
+  "fs271245.mp3",
+  "fs344407.mp3",
+  "fs344415.mp3",
+  "fs509880.mp3",
+  "fs677888.mp3"
+ ],
+ "man_hmm": [
+  "fs170779.mp3",
+  "fs275808.mp3",
+  "fs394231.mp3",
+  "fs519112.mp3"
+ ],
+ "man_hoho": [
+  "fs172302.mp3",
+  "fs610308.mp3",
+  "fs649082.mp3"
+ ],
+ "man_laugh": [
+  "fs166141.mp3",
+  "fs203719.mp3",
+  "fs529818.mp3",
+  "fs536811.mp3",
+  "fs670839.mp3",
+  "fs720133.mp3"
+ ],
+ "man_ooh": [
+  "fs213939.mp3",
+  "fs398933.mp3",
+  "fs436108.mp3",
+  "fs848609.mp3"
+ ],
+ "man_scream": [
+  "fs219654.mp3",
+  "fs272023.mp3",
+  "fs50924.mp3",
+  "fs720132.mp3"
+ ],
+ "man_sigh": [
+  "fs215380.mp3",
+  "fs275055.mp3",
+  "fs389461.mp3",
+  "fs799579.mp3"
+ ],
+ "man_yawn": [
+  "fs240139.mp3",
+  "fs272030.mp3",
+  "fs364695.mp3"
+ ],
+ "monkey_call": [
+  "fs417823.mp3",
+  "fs588625.mp3",
+  "fs674253.mp3",
+  "fs729293.mp3"
+ ],
+ "mouse_squeak": [
+  "fs188043.mp3",
+  "fs288941.mp3",
+  "fs428114.mp3",
+  "fs684866.mp3",
+  "fs800274.mp3"
+ ],
+ "panda_bleat": [
+  "fs171151.mp3",
+  "fs253871.mp3",
+  "fs669872.mp3",
+  "fs691476.mp3"
+ ],
+ "pig_oink": [
+  "fs233170.mp3",
+  "fs442905.mp3",
+  "fs442906.mp3",
+  "fs442907.mp3",
+  "fs510974.mp3"
+ ],
+ "pig_squeal": [
+  "fs233177.mp3",
+  "fs618483.mp3",
+  "fs770339.mp3"
+ ],
+ "woman_angry": [
+  "fs536750.mp3",
+  "fs800994.mp3"
+ ],
+ "woman_aww": [
+  "fs124996.mp3",
+  "fs547589.mp3"
+ ],
+ "woman_cry": [
+  "fs364481.mp3",
+  "fs482808.mp3",
+  "fs790620.mp3"
+ ],
+ "woman_gasp": [
+  "fs343878.mp3",
+  "fs389169.mp3",
+  "fs437667.mp3",
+  "fs509883.mp3",
+  "fs812418.mp3"
+ ],
+ "woman_giggle": [
+  "fs234950.mp3",
+  "fs235167.mp3",
+  "fs343984.mp3",
+  "fs343991.mp3",
+  "fs611781.mp3",
+  "fs635014.mp3"
+ ],
+ "woman_hmm": [
+  "fs170768.mp3",
+  "fs445872.mp3",
+  "fs540419.mp3"
+ ],
+ "woman_laugh": [
+  "fs343941.mp3",
+  "fs397673.mp3",
+  "fs433921.mp3",
+  "fs556251.mp3",
+  "fs93775.mp3"
+ ],
+ "woman_ooh": [
+  "fs323707.mp3",
+  "fs658569.mp3",
+  "fs659610.mp3"
+ ],
+ "woman_scream": [
+  "fs235590.mp3",
+  "fs467126.mp3",
+  "fs506682.mp3",
+  "fs577972.mp3"
+ ],
+ "woman_sigh": [
+  "fs240689.mp3",
+  "fs318089.mp3",
+  "fs384992.mp3",
+  "fs446651.mp3",
+  "fs621773.mp3"
+ ],
+ "woman_yawn": [
+  "fs221519.mp3",
+  "fs391896.mp3"
+ ]
+}

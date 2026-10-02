@@ -1,0 +1,9 @@
+# local Python environment and caches
+.venv/
+__pycache__/
+*.pyc
+# rendered videos and downloaded sound sources (big, rebuilt locally)
+videos/
+cache/
+# personal data: series plan, upload queue, YouTube OAuth client + tokens
+data/

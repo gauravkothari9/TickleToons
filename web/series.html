@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Series Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">{"imports":{"three":"/vendor/three.module.js","three/addons/":"/vendor/jsm/"}}</script>
+</head>
+<body class="studio-page">
+  <header class="topbar">
+    <a class="logo" href="/"><span class="logo-mark">☺</span><span>Tickle <span class="accent">Toons</span></span></a>
+    <strong class="series-title" id="series-title">Series Studio</strong>
+    <nav class="nav">
+      <a class="btn small" href="/">My videos</a>
+      <a class="btn small" href="studio.html">Studio</a>
+    </nav>
+  </header>
+
+  <main class="series">
+    <aside class="panel side wide">
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="plan">Episodes</button>
+        <button class="tab" data-tab="family">Family</button>
+        <button class="tab" data-tab="settings">Settings</button>
+        <button class="tab" data-tab="schedule">Schedule</button>
+        <button class="tab" data-tab="youtube">YouTube</button>
+      </div>
+      <div id="tab-plan" class="tab-body"></div>
+      <div id="tab-family" class="tab-body" hidden></div>
+      <div id="tab-settings" class="tab-body" hidden></div>
+      <div id="tab-schedule" class="tab-body" hidden></div>
+      <div id="tab-youtube" class="tab-body" hidden></div>
+    </aside>
+
+    <section class="series-side">
+      <div class="panel preview-panel">
+        <h3 id="preview-title">Character preview</h3>
+        <div class="preview-view"><canvas id="char-preview"></canvas><span class="preview-hint">Drag to turn</span></div>
+        <div class="row">
+          <label class="field">Who<select id="pv-who"></select></label>
+          <label class="field">Clothes<select id="pv-look"></select></label>
+        </div>
+        <div class="row">
+          <label class="field">Try action<select id="pv-action"></select></label>
+          <button class="btn small" id="pv-voice">▶ Hear voice</button>
+        </div>
+      </div>
+      <div class="panel render-panel">
+        <h3 id="player-title">Watch before rendering</h3>
+        <div class="stage"><canvas id="output"></canvas><div id="pv-note" class="stage-note">Press ▶ on an episode to watch it here.</div></div>
+        <div class="transport">
+          <button id="ep-play" class="btn small icon" disabled>▶ Play</button>
+          <input id="ep-scrub" type="range" min="0" step="0.01" value="0" aria-label="Timeline" disabled>
+          <span id="ep-time" class="time">0:00 / 0:00</span>
+        </div>
+        <p id="render-step" class="muted small">Idle. Generate episodes, watch any with ▶, then press "Render all".</p>
+        <div class="progress on"><div id="render-bar" style="width:0%"></div></div>
+        <p id="render-eta" class="muted small"></p>
+        <p class="muted small">Keep this tab open while rendering. Each 5-minute episode takes about 10 minutes on a typical PC; a Short about 2.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="status"></div>
+  <script type="module" src="js/series.js"></script>
+</body>
+</html>

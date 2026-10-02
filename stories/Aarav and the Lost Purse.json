@@ -1,0 +1,1568 @@
+{
+  "title": "Aarav and the Lost Purse",
+  "aspect": "16:9",
+  "music": "happy",
+  "musicVolume": 0.5,
+  "subtitles": true,
+  "titleCard": true,
+  "cast": [
+    {
+      "id": "aarav",
+      "name": "Aarav",
+      "type": "boy",
+      "color": "#e8b48c",
+      "accent": "#1e4fbf",
+      "hair": "#2a1a12",
+      "eyes": "#4a2c17",
+      "outfit": "schoolboy",
+      "voice": "en-US-AnaNeural",
+      "pitch": -20,
+      "rate": 8
+    },
+    {
+      "id": "riya",
+      "name": "Riya",
+      "type": "girl",
+      "color": "#e2ae88",
+      "accent": "#c62848",
+      "hair": "#1e130c",
+      "eyes": "#3b2415",
+      "outfit": "schoolgirl",
+      "voice": "en-US-AnaNeural",
+      "pitch": 8,
+      "rate": 8
+    },
+    {
+      "id": "kabir",
+      "name": "Kabir",
+      "type": "boy",
+      "color": "#c98f62",
+      "accent": "#2e7d32",
+      "hair": "#1a110b",
+      "eyes": "#3b2415",
+      "outfit": "schoolboy",
+      "voice": "en-US-AnaNeural",
+      "pitch": -28,
+      "rate": 14
+    },
+    {
+      "id": "mom",
+      "name": "Mumma",
+      "type": "woman",
+      "color": "#e2ae88",
+      "accent": "#e0457b",
+      "hair": "#1e130c",
+      "eyes": "#3b2415",
+      "outfit": "saree",
+      "voice": "en-IN-NeerjaNeural",
+      "pitch": 0,
+      "rate": 8
+    },
+    {
+      "id": "dadi",
+      "name": "Dadi",
+      "type": "grandma",
+      "color": "#e0ad88",
+      "accent": "#8e5bd0",
+      "hair": "#dcdcdc",
+      "eyes": "#3b2415",
+      "outfit": "saree",
+      "voice": "en-IN-NeerjaNeural",
+      "pitch": -14,
+      "rate": -4
+    },
+    {
+      "id": "dadaji",
+      "name": "Dadaji",
+      "type": "grandpa",
+      "color": "#d6a07a",
+      "accent": "#f2efe6",
+      "hair": "#e6e6e6",
+      "eyes": "#3b2415",
+      "outfit": "kurtapajama",
+      "voice": "en-IN-PrabhatNeural",
+      "pitch": -10,
+      "rate": 0
+    },
+    {
+      "id": "teacher",
+      "name": "Ms. Mehta",
+      "type": "woman",
+      "color": "#d9a47c",
+      "accent": "#00897b",
+      "hair": "#2a1a12",
+      "eyes": "#3b2415",
+      "outfit": "salwar",
+      "voice": "en-US-EmmaNeural",
+      "pitch": 2,
+      "rate": 6
+    },
+    {
+      "id": "inspector",
+      "name": "Inspector Singh",
+      "type": "man",
+      "color": "#c98f62",
+      "accent": "#4a7bd0",
+      "hair": "#1a110b",
+      "eyes": "#3b2415",
+      "outfit": "police",
+      "voice": "en-US-ChristopherNeural",
+      "pitch": -4,
+      "rate": 4
+    },
+    {
+      "id": "kapoor",
+      "name": "Mrs. Kapoor",
+      "type": "woman",
+      "color": "#f1c7a0",
+      "accent": "#ff7043",
+      "hair": "#3a2416",
+      "eyes": "#3b2415",
+      "outfit": "saree",
+      "voice": "en-US-AriaNeural",
+      "pitch": 0,
+      "rate": 8
+    },
+    {
+      "id": "chintu",
+      "name": "Chintu",
+      "type": "boy",
+      "color": "#f1c7a0",
+      "accent": "#7c4dff",
+      "hair": "#5a3620",
+      "eyes": "#6b4423",
+      "outfit": "suit",
+      "voice": "en-GB-MaisieNeural",
+      "pitch": -8,
+      "rate": 12
+    }
+  ],
+  "shots": [
+    {
+      "id": "l3",
+      "world": "bedroom",
+      "camera": "push",
+      "transition": "fade",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "aarav",
+          "x": 0,
+          "z": -0.5,
+          "action": "sleep",
+          "mood": "calm",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l1",
+          "castId": "dadaji",
+          "emotion": "calm",
+          "text": "Once upon a time, | there lived a little boy | named *Aarav*."
+        },
+        {
+          "id": "l2",
+          "castId": "dadaji",
+          "emotion": "happy",
+          "text": "And every morning, Aarav wanted just... [0.3] *five* more minutes of sleep!",
+          "pause": 0.6
+        }
+      ]
+    },
+    {
+      "id": "l8",
+      "world": "bedroom",
+      "camera": "auto",
+      "transition": "cut",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "aarav",
+          "x": 0.6,
+          "z": 0,
+          "action": "yawn",
+          "mood": "calm",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "mom",
+          "x": -1.2,
+          "z": 0.2,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "walk-left",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l4",
+          "castId": "mom",
+          "emotion": "happy",
+          "text": "Aaa-raaav! [0.3] Wake up, sleepyhead! The sun is already up!"
+        },
+        {
+          "id": "l5",
+          "castId": "aarav",
+          "emotion": "calm",
+          "text": "Mmmm... [0.5] just five more minutes, Mumma..."
+        },
+        {
+          "id": "l6",
+          "castId": "mom",
+          "emotion": "laugh",
+          "text": "Ha ha! | No more minutes, mister. School is waiting!"
+        },
+        {
+          "id": "l7",
+          "castId": "aarav",
+          "emotion": "excited",
+          "text": "Okay, okay! [0.2] I am up! I am up!"
+        }
+      ]
+    },
+    {
+      "id": "l11",
+      "world": "bedroom",
+      "camera": "auto",
+      "transition": "cut",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "aarav",
+          "x": -1.2,
+          "z": 0,
+          "action": "brush",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": 1.2,
+          "z": 0.2,
+          "action": "idle",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "run-right",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l9",
+          "castId": "riya",
+          "emotion": "excited",
+          "text": "Bhaiya, hurry! | Today is the *big* drawing competition!"
+        },
+        {
+          "id": "l10",
+          "castId": "aarav",
+          "emotion": "surprised",
+          "text": "Oh no! [0.25] I almost forgot! | I *really* want that golden trophy!"
+        }
+      ]
+    },
+    {
+      "id": "l15",
+      "world": "kitchen",
+      "camera": "auto",
+      "transition": "fade",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "aarav",
+          "x": -1.4,
+          "z": 0.4,
+          "action": "eat",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": 0,
+          "z": 0.6,
+          "action": "drink",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "dadi",
+          "x": 1.5,
+          "z": 0.2,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "laddoo",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l12",
+          "castId": "dadi",
+          "emotion": "happy",
+          "text": "Eat up, my little champions!"
+        },
+        {
+          "id": "l13",
+          "castId": "dadi",
+          "emotion": "laugh",
+          "text": "And... [0.3] one laddoo each, | for good luck!"
+        },
+        {
+          "id": "l14",
+          "castId": "aarav",
+          "emotion": "excited",
+          "text": "Yaaay! Laddoos! | Thank you, Dadi!"
+        }
+      ]
+    },
+    {
+      "id": "l21",
+      "world": "street",
+      "camera": "auto",
+      "transition": "fade",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "aarav",
+          "x": -0.8,
+          "z": 0.2,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "schoolbag",
+          "enter": "walk-left",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": 0.4,
+          "z": 0.3,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "schoolbag",
+          "enter": "walk-left",
+          "exit": "none"
+        },
+        {
+          "castId": "mom",
+          "x": -2.2,
+          "z": 0,
+          "action": "wave",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "walk-left",
+          "exit": "none"
+        },
+        {
+          "castId": "kabir",
+          "x": 1.9,
+          "z": 0,
+          "action": "wave",
+          "mood": "excited",
+          "holds": "schoolbag",
+          "enter": "run-right",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l16",
+          "castId": "kabir",
+          "emotion": "excited",
+          "text": "Aarav! | Riya! | Wait for meee!",
+          "pause": 0.3
+        },
+        {
+          "id": "l17",
+          "castId": "aarav",
+          "emotion": "happy",
+          "text": "Good morning, Kabir! Ready for the competition?"
+        },
+        {
+          "id": "l18",
+          "castId": "kabir",
+          "emotion": "excited",
+          "text": "Ready? | I am going to draw a *giant* dinosaur! [0.3] Roooar!"
+        },
+        {
+          "id": "l19",
+          "castId": "mom",
+          "emotion": "happy",
+          "text": "Stay together, children. | And cross only at the zebra crossing!"
+        },
+        {
+          "id": "l20",
+          "castId": "aarav",
+          "emotion": "happy",
+          "text": "Yes, Mumma! | Bye bye!"
+        }
+      ]
+    },
+    {
+      "id": "l23",
+      "world": "school",
+      "camera": "auto",
+      "transition": "cut",
+      "minDuration": 6,
+      "actors": [
+        {
+          "castId": "aarav",
+          "x": -1.4,
+          "z": 0,
+          "action": "walkaround",
+          "mood": "happy",
+          "holds": "schoolbag",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": 0.2,
+          "z": 0.3,
+          "action": "jumprope",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "kabir",
+          "x": 1.8,
+          "z": 0,
+          "action": "kick",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l22",
+          "castId": "dadaji",
+          "emotion": "happy",
+          "text": "At school, the children played and played... [0.4] until the bell rang!",
+          "pause": 0.8
+        }
+      ]
+    },
+    {
+      "id": "l27",
+      "world": "classroom",
+      "camera": "auto",
+      "transition": "fade",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "teacher",
+          "x": 0,
+          "z": -0.8,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "trophy",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "aarav",
+          "x": -2.2,
+          "z": 0.6,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": 2.2,
+          "z": 0.6,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "kabir",
+          "x": -0.9,
+          "z": 1.1,
+          "action": "idle",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l24",
+          "castId": "teacher",
+          "emotion": "happy",
+          "text": "Good morning, class! | Today is our drawing competition."
+        },
+        {
+          "id": "l25",
+          "castId": "teacher",
+          "emotion": "excited",
+          "text": "And the best picture wins... [0.5] this *golden* trophy!"
+        },
+        {
+          "id": "l26",
+          "castId": "kabir",
+          "emotion": "surprised",
+          "text": "Whoaaa! It sparkles!"
+        }
+      ]
+    },
+    {
+      "id": "l30",
+      "world": "classroom",
+      "camera": "auto",
+      "transition": "cut",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "teacher",
+          "x": 0,
+          "z": -0.8,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "trophy",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "aarav",
+          "x": -2.2,
+          "z": 0.6,
+          "action": "raisehand",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": 2.2,
+          "z": 0.6,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l28",
+          "castId": "aarav",
+          "emotion": "excited",
+          "text": "Ma'am! Ma'am! | What should we draw?"
+        },
+        {
+          "id": "l29",
+          "castId": "teacher",
+          "emotion": "happy",
+          "text": "Draw what makes you *happy*. [0.3] Ready... | steady... | draw!"
+        }
+      ]
+    },
+    {
+      "id": "l33",
+      "world": "classroom",
+      "camera": "auto",
+      "transition": "cut",
+      "minDuration": 5,
+      "actors": [
+        {
+          "castId": "aarav",
+          "x": -1.6,
+          "z": 0,
+          "action": "study",
+          "mood": "thinking",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": 1.4,
+          "z": 0.2,
+          "action": "paint",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l31",
+          "castId": "aarav",
+          "emotion": "thinking",
+          "text": "Hmmm... [0.6] I know! | I will draw my whole family, | holding hands."
+        },
+        {
+          "id": "l32",
+          "castId": "riya",
+          "emotion": "happy",
+          "text": "Awww, Bhaiya! | That is *so* beautiful!"
+        }
+      ]
+    },
+    {
+      "id": "l36",
+      "world": "classroom",
+      "camera": "auto",
+      "transition": "cut",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "teacher",
+          "x": 0,
+          "z": -0.8,
+          "action": "clap",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "kabir",
+          "x": -1.8,
+          "z": 0.6,
+          "action": "sad",
+          "mood": "sad",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "aarav",
+          "x": 1.8,
+          "z": 0.6,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l34",
+          "castId": "teacher",
+          "emotion": "happy",
+          "text": "Wonderful work, everyone! | I will announce the winner... [0.3] tomorrow."
+        },
+        {
+          "id": "l35",
+          "castId": "kabir",
+          "emotion": "sad",
+          "text": "Tomorrow? [0.4] Ohhh... | I cannot wait that long!"
+        }
+      ]
+    },
+    {
+      "id": "l39",
+      "world": "market",
+      "camera": "auto",
+      "transition": "fade",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "dadi",
+          "x": -1.2,
+          "z": 0,
+          "action": "cart",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": 0.8,
+          "z": 0.3,
+          "action": "idle",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "walk-left",
+          "exit": "none"
+        },
+        {
+          "castId": "aarav",
+          "x": 2,
+          "z": 0.2,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "walk-left",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l37",
+          "castId": "dadaji",
+          "emotion": "happy",
+          "text": "After school, Dadi took the children to the busy, | noisy market.",
+          "pause": 0.8
+        },
+        {
+          "id": "l38",
+          "castId": "dadi",
+          "emotion": "happy",
+          "text": "Stay close to me, children!"
+        }
+      ]
+    },
+    {
+      "id": "l42",
+      "world": "market",
+      "camera": "auto",
+      "transition": "cut",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "aarav",
+          "x": -0.9,
+          "z": 0,
+          "action": "point",
+          "mood": "surprised",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "kabir",
+          "x": 1,
+          "z": 0.2,
+          "action": "idle",
+          "mood": "surprised",
+          "holds": "none",
+          "enter": "run-right",
+          "exit": "none"
+        }
+      ],
+      "props": [
+        {
+          "kind": "purse",
+          "x": 0,
+          "z": 0.9
+        }
+      ],
+      "lines": [
+        {
+          "id": "l40",
+          "castId": "aarav",
+          "emotion": "surprised",
+          "text": "Hey! [0.3] What is this? | Somebody dropped a purse!",
+          "pause": 0.8
+        },
+        {
+          "id": "l41",
+          "castId": "kabir",
+          "emotion": "excited",
+          "text": "Ooh! I saw it too! | Open it, open it!"
+        }
+      ]
+    },
+    {
+      "id": "l46",
+      "world": "market",
+      "camera": "auto",
+      "transition": "cut",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "aarav",
+          "x": -0.9,
+          "z": 0,
+          "action": "idle",
+          "mood": "surprised",
+          "holds": "purse",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "kabir",
+          "x": 1,
+          "z": 0.2,
+          "action": "cheer",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l43",
+          "castId": "kabir",
+          "emotion": "excited",
+          "text": "Whoa! [0.3] It is *full* of money! | We can buy *so* many toys!"
+        },
+        {
+          "id": "l44",
+          "castId": "aarav",
+          "emotion": "thinking",
+          "text": "But Kabir... [0.6] this money is not *ours*.",
+          "pause": 0.7
+        },
+        {
+          "id": "l45",
+          "castId": "kabir",
+          "emotion": "happy",
+          "text": "Nobody saw us! | Finders keepers!"
+        }
+      ]
+    },
+    {
+      "id": "l51",
+      "world": "market",
+      "camera": "auto",
+      "transition": "cut",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "aarav",
+          "x": -0.9,
+          "z": 0,
+          "action": "think",
+          "mood": "thinking",
+          "holds": "purse",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": 0.4,
+          "z": 0.4,
+          "action": "sad",
+          "mood": "sad",
+          "holds": "none",
+          "enter": "walk-right",
+          "exit": "none"
+        },
+        {
+          "castId": "kabir",
+          "x": 1.7,
+          "z": 0.2,
+          "action": "shrug",
+          "mood": "thinking",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l47",
+          "castId": "aarav",
+          "emotion": "thinking",
+          "text": "Hmm... [0.5] what if someone is looking for it... | right now?"
+        },
+        {
+          "id": "l48",
+          "castId": "riya",
+          "emotion": "sad",
+          "text": "Maybe they are *very* worried, Bhaiya."
+        },
+        {
+          "id": "l49",
+          "castId": "aarav",
+          "emotion": "happy",
+          "text": "Dadi always says... [0.4] if it is not ours, | we *give it back*.",
+          "pause": 0.6
+        },
+        {
+          "id": "l50",
+          "castId": "kabir",
+          "emotion": "thinking",
+          "text": "Hmm... [0.5] Okay. | You are right. Let us find the owner."
+        }
+      ]
+    },
+    {
+      "id": "l54",
+      "world": "market",
+      "camera": "auto",
+      "transition": "cut",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "dadi",
+          "x": -1.6,
+          "z": 0,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "walk-left",
+          "exit": "none"
+        },
+        {
+          "castId": "aarav",
+          "x": 0,
+          "z": 0.3,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "purse",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": 1.3,
+          "z": 0.3,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "kabir",
+          "x": 2.5,
+          "z": 0.2,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l52",
+          "castId": "aarav",
+          "emotion": "happy",
+          "text": "Dadi! | We found this purse on the ground."
+        },
+        {
+          "id": "l53",
+          "castId": "dadi",
+          "emotion": "excited",
+          "text": "Arre wah! My *honest* children! [0.3] Come, | to the police station!"
+        }
+      ]
+    },
+    {
+      "id": "l58",
+      "world": "police",
+      "camera": "auto",
+      "transition": "fade",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "inspector",
+          "x": 1.6,
+          "z": -0.4,
+          "action": "salute",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "aarav",
+          "x": -0.6,
+          "z": 0.3,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "purse",
+          "enter": "walk-left",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": -1.8,
+          "z": 0.4,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "walk-left",
+          "exit": "none"
+        },
+        {
+          "castId": "kabir",
+          "x": -3,
+          "z": 0.3,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "walk-left",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l55",
+          "castId": "inspector",
+          "emotion": "happy",
+          "text": "Hello, children! | How can I help you?"
+        },
+        {
+          "id": "l56",
+          "castId": "aarav",
+          "emotion": "happy",
+          "text": "Sir, | we found this purse in the market. | It is not ours."
+        },
+        {
+          "id": "l57",
+          "castId": "inspector",
+          "emotion": "surprised",
+          "text": "You brought it *all* the way here? [0.3] That is *very* honest of you!"
+        }
+      ]
+    },
+    {
+      "id": "l63",
+      "world": "police",
+      "camera": "auto",
+      "transition": "cut",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "kapoor",
+          "x": 2.2,
+          "z": 0.2,
+          "action": "cry",
+          "mood": "sad",
+          "holds": "none",
+          "enter": "run-right",
+          "exit": "none"
+        },
+        {
+          "castId": "inspector",
+          "x": 0.6,
+          "z": -0.4,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "aarav",
+          "x": -0.8,
+          "z": 0.3,
+          "action": "idle",
+          "mood": "surprised",
+          "holds": "purse",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": -2,
+          "z": 0.4,
+          "action": "idle",
+          "mood": "surprised",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l59",
+          "castId": "kapoor",
+          "emotion": "scared",
+          "text": "Inspector sir! | Inspector sir! [0.3] I lost my purse in the market!",
+          "pause": 1.2
+        },
+        {
+          "id": "l60",
+          "castId": "kapoor",
+          "emotion": "sad",
+          "text": "It had the money... [0.4] for my son's birthday party."
+        },
+        {
+          "id": "l61",
+          "castId": "inspector",
+          "emotion": "happy",
+          "text": "Madam, | is *this* your purse? | These children found it."
+        },
+        {
+          "id": "l62",
+          "castId": "kapoor",
+          "emotion": "surprised",
+          "text": "My purse! [0.4] Oh, thank you! | Thank you *so* much!"
+        }
+      ]
+    },
+    {
+      "id": "l67",
+      "world": "police",
+      "camera": "auto",
+      "transition": "cut",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "kapoor",
+          "x": 1.6,
+          "z": 0.2,
+          "action": "namaste",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "aarav",
+          "x": -0.4,
+          "z": 0.3,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": -1.6,
+          "z": 0.4,
+          "action": "cheer",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "inspector",
+          "x": 3,
+          "z": -0.4,
+          "action": "salute",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l64",
+          "castId": "kapoor",
+          "emotion": "excited",
+          "text": "Please, | come to my son Chintu's birthday party tomorrow!"
+        },
+        {
+          "id": "l65",
+          "castId": "riya",
+          "emotion": "excited",
+          "text": "A birthday party? [0.2] Yaaay!"
+        },
+        {
+          "id": "l66",
+          "castId": "inspector",
+          "emotion": "happy",
+          "text": "Honest children... [0.3] make our town a *better* place.",
+          "pause": 0.6
+        }
+      ]
+    },
+    {
+      "id": "l70",
+      "world": "classroom",
+      "camera": "auto",
+      "transition": "fade",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "teacher",
+          "x": 0,
+          "z": -0.8,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "trophy",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "aarav",
+          "x": -1.8,
+          "z": 0.6,
+          "action": "idle",
+          "mood": "surprised",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "kabir",
+          "x": 1.8,
+          "z": 0.6,
+          "action": "clap",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l68",
+          "castId": "teacher",
+          "emotion": "excited",
+          "text": "And the winner is... [0.9] *Aarav*! | For his lovely family picture!",
+          "pause": 0.8
+        },
+        {
+          "id": "l69",
+          "castId": "aarav",
+          "emotion": "surprised",
+          "text": "Me? [0.3] Really? | Thank you, Ma'am!"
+        }
+      ]
+    },
+    {
+      "id": "l73",
+      "world": "classroom",
+      "camera": "auto",
+      "transition": "cut",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "aarav",
+          "x": -1.6,
+          "z": 0.4,
+          "action": "cheer",
+          "mood": "excited",
+          "holds": "trophy",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "teacher",
+          "x": 0,
+          "z": -0.8,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "kabir",
+          "x": 1.6,
+          "z": 0.6,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l71",
+          "castId": "teacher",
+          "emotion": "happy",
+          "text": "I also heard how honest you were yesterday. | I am *so* proud of you."
+        },
+        {
+          "id": "l72",
+          "castId": "kabir",
+          "emotion": "happy",
+          "text": "Aarav taught me something... [0.4] being honest is *better* than any toy!",
+          "pause": 0.6
+        }
+      ]
+    },
+    {
+      "id": "l77",
+      "world": "birthday",
+      "camera": "auto",
+      "transition": "fade",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "chintu",
+          "x": 0,
+          "z": 0,
+          "action": "cheer",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "kapoor",
+          "x": 1.6,
+          "z": -0.3,
+          "action": "clap",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "aarav",
+          "x": -1.4,
+          "z": 0.4,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "gift",
+          "enter": "walk-left",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": -2.6,
+          "z": 0.5,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "balloon",
+          "enter": "walk-left",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l74",
+          "castId": "chintu",
+          "emotion": "excited",
+          "text": "Welcome to my party! | Thank you for finding Mummy's purse!"
+        },
+        {
+          "id": "l75",
+          "castId": "aarav",
+          "emotion": "happy",
+          "text": "Happy birthday, Chintu! | This gift is for you."
+        },
+        {
+          "id": "l76",
+          "castId": "kapoor",
+          "emotion": "excited",
+          "text": "Come on, everyone! | Let's cut the cake!"
+        }
+      ]
+    },
+    {
+      "id": "l79",
+      "world": "birthday",
+      "camera": "orbit",
+      "transition": "cut",
+      "minDuration": 6,
+      "actors": [
+        {
+          "castId": "chintu",
+          "x": 0,
+          "z": 0,
+          "action": "bhangra",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "aarav",
+          "x": -1.5,
+          "z": 0.3,
+          "action": "dance",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": 1.5,
+          "z": 0.3,
+          "action": "twirl",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "kabir",
+          "x": -2.9,
+          "z": 0.4,
+          "action": "hiphop",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "kapoor",
+          "x": 2.9,
+          "z": -0.2,
+          "action": "clap",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l78",
+          "castId": "dadaji",
+          "emotion": "laugh",
+          "text": "Everybody danced... | and laughed... | and it was the *best* party ever!",
+          "pause": 0.8
+        }
+      ]
+    },
+    {
+      "id": "l84",
+      "world": "house",
+      "camera": "auto",
+      "transition": "fade",
+      "minDuration": 4,
+      "actors": [
+        {
+          "castId": "dadaji",
+          "x": 0,
+          "z": -0.4,
+          "action": "idle",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "aarav",
+          "x": -1.5,
+          "z": 0.5,
+          "action": "sitfloor",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": 1.5,
+          "z": 0.5,
+          "action": "sitcross",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l80",
+          "castId": "dadaji",
+          "emotion": "happy",
+          "text": "So, children... [0.4] what did we learn from Aarav's story?"
+        },
+        {
+          "id": "l81",
+          "castId": "riya",
+          "emotion": "happy",
+          "text": "If we find something that is not ours... [0.3] we *always* give it back!",
+          "pause": 0.7
+        },
+        {
+          "id": "l82",
+          "castId": "dadaji",
+          "emotion": "excited",
+          "text": "That's right! [0.4] Honesty | is the *best* policy."
+        },
+        {
+          "id": "l83",
+          "castId": "dadaji",
+          "emotion": "calm",
+          "text": "Be honest, | be kind... [0.4] and you will always shine, | like a golden trophy.",
+          "pause": 0.6
+        }
+      ]
+    },
+    {
+      "id": "l87",
+      "world": "house",
+      "camera": "wide",
+      "transition": "cut",
+      "minDuration": 5,
+      "actors": [
+        {
+          "castId": "aarav",
+          "x": -1,
+          "z": 0.3,
+          "action": "wave",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "riya",
+          "x": 1,
+          "z": 0.3,
+          "action": "wave",
+          "mood": "excited",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        },
+        {
+          "castId": "dadaji",
+          "x": 0,
+          "z": -0.6,
+          "action": "wave",
+          "mood": "happy",
+          "holds": "none",
+          "enter": "none",
+          "exit": "none"
+        }
+      ],
+      "props": [],
+      "lines": [
+        {
+          "id": "l85",
+          "castId": "aarav",
+          "emotion": "excited",
+          "text": "Bye bye, friends! | Always be honest!"
+        },
+        {
+          "id": "l86",
+          "castId": "riya",
+          "emotion": "excited",
+          "text": "See you next time!"
+        }
+      ]
+    }
+  ]
+}

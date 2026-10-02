@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Toon Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">{"imports":{"three":"/vendor/three.module.js","three/addons/":"/vendor/jsm/"}}</script>
+</head>
+<body class="studio-page">
+  <header class="topbar">
+    <a class="logo" href="/"><span class="logo-mark">☺</span><span>Tickle <span class="accent">Toons</span></span></a>
+    <input id="title" class="title-input" type="text" maxlength="80" placeholder="Story title" aria-label="Story title">
+    <nav class="nav">
+      <a class="btn small" href="/">My videos</a>
+      <a class="btn small" href="series.html">📺 Series</a>
+      <button id="btn-render" class="btn primary">🎬 Make video</button>
+    </nav>
+  </header>
+
+  <main class="studio2">
+    <aside class="panel side">
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="shot">Shot</button>
+        <button class="tab" data-tab="cast">Characters</button>
+        <button class="tab" data-tab="story">Story</button>
+      </div>
+      <div id="tab-shot" class="tab-body"></div>
+      <div id="tab-cast" class="tab-body" hidden>
+        <div class="cast-preview">
+          <div class="preview-view">
+            <canvas id="char-preview" aria-label="3D character preview"></canvas>
+            <span id="preview-name" class="preview-name"></span>
+            <span class="preview-hint">Drag to turn · scroll to zoom</span>
+          </div>
+          <div class="row">
+            <label class="field">Try action<select id="preview-action"></select></label>
+            <label class="field">Try face<select id="preview-mood"></select></label>
+          </div>
+        </div>
+        <div id="cast-list"></div>
+      </div>
+      <div id="tab-story" class="tab-body" hidden></div>
+    </aside>
+
+    <section class="stage-col">
+      <div class="stage">
+        <canvas id="output"></canvas>
+        <div id="loading" class="stage-note">Loading…</div>
+      </div>
+      <div class="transport">
+        <button id="btn-play" class="btn icon" title="Play / pause (Space)">▶ Play</button>
+        <input id="scrub" type="range" min="0" step="0.01" value="0" aria-label="Timeline">
+        <span id="time" class="time">0:00 / 0:00</span>
+        <select id="quality" title="Preview quality">
+          <option value="pretty">Pretty preview</option>
+          <option value="fast">Fast preview</option>
+        </select>
+      </div>
+      <div id="status" class="status"></div>
+      <div class="strip-head">
+        <strong>Shots</strong>
+        <span class="muted">Click a shot to edit it. The video plays them in order.</span>
+      </div>
+      <div id="strip" class="strip"></div>
+    </section>
+  </main>
+
+  <div id="render-modal" class="modal-backdrop" hidden>
+    <div class="modal">
+      <h2>Making your video</h2>
+      <p id="render-step">Getting ready…</p>
+      <div class="progress on"><div id="render-bar"></div></div>
+      <p id="render-eta" class="muted"></p>
+      <p class="muted small">Rendering happens frame by frame at full quality, so it's fine if your computer is slow. Keep this tab open.</p>
+      <button id="btn-cancel" class="btn danger">Cancel</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/studio.js"></script>
+</body>
+</html>

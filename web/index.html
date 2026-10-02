@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tickle Toons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="logo" href="/"><span class="logo-mark">☺</span><span>Tickle <span class="accent">Toons</span></span></a>
+    <nav class="nav"><a class="btn small" href="series.html">📺 Series</a><a class="btn primary" href="studio.html">+ Create video</a></nav>
+  </header>
+
+  <main class="page">
+    <div class="hero">
+      <div>
+        <h1>My Toons</h1>
+        <p id="count">Loading…</p>
+      </div>
+    </div>
+    <div id="grid" class="grid"></div>
+  </main>
+
+  <div id="player" class="player-backdrop" role="dialog" aria-modal="true">
+    <div class="player">
+      <video id="player-video" controls playsinline></video>
+      <div class="player-info">
+        <div>
+          <h2 id="player-title"></h2>
+          <small id="player-meta"></small>
+        </div>
+        <div class="actions">
+          <a id="btn-download" class="btn small" download>Download</a>
+          <a id="btn-remix" class="btn small purple">Remix</a>
+          <button id="btn-delete" class="btn small danger">Delete</button>
+          <button id="btn-close" class="btn small">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/gallery.js"></script>
+</body>
+</html>
