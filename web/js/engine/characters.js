@@ -19,18 +19,18 @@ export const SPECIES = {
   grandma: { label: 'Grandma', kind: 'human', color: '#e0ad88', accent: '#8e5bd0', hair: '#dcdcdc', eyes: '#3b2415', outfit: 'saree', hairStyle: 'bun', adult: true, elder: true, glasses: true, bindi: true },
   pandit: { label: 'Pandit-ji (priest)', kind: 'human', color: '#c98b62', accent: '#ff9800', hair: '#2a221c', eyes: '#3b2415', outfit: 'kurta', hairStyle: 'shikha', adult: true, tilak: true, mala: true, mustache: true },
   narrator: { label: 'Spiritual narrator (man)', kind: 'human', color: '#c98b62', accent: '#fbf8f0', hair: '#3a302a', eyes: '#3b2415', outfit: 'kurta', adult: true, beard: true, turban: '#ff8c1a', tilak: true, garland: true },
-  bunny: { label: 'Bunny', kind: 'animal', color: '#f7f1ea', accent: '#ff9ec4', eyes: '#4a2f1d', ears: 'bunny', nose: '#ff7fa8', tail: 'puff' },
-  bear: { label: 'Bear', kind: 'animal', color: '#a8703f', accent: '#2fb67a', eyes: '#2a1a10', ears: 'round', nose: '#2a1a12', muzzle: true, tail: 'stub' },
-  cat: { label: 'Cat', kind: 'animal', color: '#f4a24a', accent: '#7ad3ff', eyes: '#3f9a3a', ears: 'pointy', nose: '#ff8fb1', tail: 'long', whiskers: true },
-  puppy: { label: 'Puppy', kind: 'animal', color: '#e9c9a0', accent: '#ff5c5c', eyes: '#3b2415', ears: 'floppy', nose: '#2a1a12', muzzle: true, tail: 'wag' },
-  fox: { label: 'Fox', kind: 'animal', color: '#f07a2c', accent: '#4db6ff', eyes: '#3a2412', ears: 'pointy', nose: '#1d1410', muzzle: true, tail: 'bushy', whiskers: true },
-  panda: { label: 'Panda', kind: 'animal', color: '#f7f5f0', accent: '#7ad36b', eyes: '#1a1a1a', ears: 'round', nose: '#1a1a1a', muzzle: true, tail: 'stub', dark: '#26262b' },
-  mouse: { label: 'Mouse', kind: 'animal', color: '#b9b4c2', accent: '#ffd23f', eyes: '#1f1a24', ears: 'round', earSize: 1.75, earPos: [0.62, 0.95], nose: '#ff8fb1', tail: 'thin', whiskers: true },
-  lion: { label: 'Lion', kind: 'animal', color: '#e9b35a', accent: '#e53935', hair: '#b5652a', eyes: '#5a3a12', ears: 'round', nose: '#5a3322', muzzle: true, tail: 'tuft', mane: true },
-  monkey: { label: 'Monkey', kind: 'animal', color: '#8a5a36', accent: '#ffcf3f', eyes: '#2a1a10', ears: 'round', earSize: 1.1, earPos: [0.05, 1.5], nose: '#3a2418', muzzle: true, face: true, tail: 'long' },
-  pig: { label: 'Piggy', kind: 'animal', color: '#ffb3c1', accent: '#6ec3ff', eyes: '#2a1a1a', ears: 'pointy', nose: '#ff8aa5', snout: true, tail: 'curly' },
-  elephant: { label: 'Elephant', kind: 'animal', color: '#a9b0bd', accent: '#ff8fb1', eyes: '#2a2430', ears: 'elephant', nose: '#8a909c', trunk: true, tail: 'stub' },
-  koala: { label: 'Koala', kind: 'animal', color: '#9ea3ab', accent: '#ff9e4a', eyes: '#1d1a1a', ears: 'round', earSize: 1.55, earPos: [0.6, 0.95], nose: '#2a2a2e', noseSize: 2.2, tail: 'none' },
+  bunny: { label: 'Bunny', kind: 'animal', size: 0.85, gait: 'hop', color: '#f7f1ea', accent: '#ff9ec4', eyes: '#4a2f1d', ears: 'bunny', nose: '#ff7fa8', tail: 'puff' },
+  bear: { label: 'Bear', kind: 'animal', size: 1.15, color: '#a8703f', accent: '#2fb67a', eyes: '#2a1a10', ears: 'round', nose: '#2a1a12', muzzle: true, tail: 'stub' },
+  cat: { label: 'Cat', kind: 'animal', size: 0.9, color: '#f4a24a', accent: '#7ad3ff', eyes: '#3f9a3a', ears: 'pointy', nose: '#ff8fb1', tail: 'long', whiskers: true },
+  puppy: { label: 'Puppy', kind: 'animal', size: 0.95, color: '#e9c9a0', accent: '#ff5c5c', eyes: '#3b2415', ears: 'floppy', nose: '#2a1a12', muzzle: true, tail: 'wag' },
+  fox: { label: 'Fox', kind: 'animal', size: 0.95, color: '#f07a2c', accent: '#4db6ff', eyes: '#3a2412', ears: 'pointy', nose: '#1d1410', muzzle: true, tail: 'bushy', whiskers: true },
+  panda: { label: 'Panda', kind: 'animal', size: 1.1, color: '#f7f5f0', accent: '#7ad36b', eyes: '#1a1a1a', ears: 'round', nose: '#1a1a1a', muzzle: true, tail: 'stub', dark: '#26262b' },
+  mouse: { label: 'Mouse', kind: 'animal', size: 0.8, color: '#b9b4c2', accent: '#ffd23f', eyes: '#1f1a24', ears: 'round', earSize: 1.75, earPos: [0.62, 0.95], nose: '#ff8fb1', tail: 'thin', whiskers: true },
+  lion: { label: 'Lion', kind: 'animal', size: 1.15, color: '#e9b35a', accent: '#e53935', hair: '#b5652a', eyes: '#5a3a12', ears: 'round', nose: '#5a3322', muzzle: true, tail: 'tuft', mane: true },
+  monkey: { label: 'Monkey', kind: 'animal', size: 0.95, color: '#8a5a36', accent: '#ffcf3f', eyes: '#2a1a10', ears: 'round', earSize: 1.1, earPos: [0.05, 1.5], nose: '#3a2418', muzzle: true, face: true, tail: 'long' },
+  pig: { label: 'Piggy', kind: 'animal', size: 1, color: '#ffb3c1', accent: '#6ec3ff', eyes: '#2a1a1a', ears: 'pointy', nose: '#ff8aa5', snout: true, tail: 'curly' },
+  elephant: { label: 'Elephant', kind: 'animal', size: 1.35, color: '#a9b0bd', accent: '#ff8fb1', eyes: '#2a2430', ears: 'elephant', nose: '#8a909c', trunk: true, tail: 'stub' },
+  koala: { label: 'Koala', kind: 'animal', size: 0.95, color: '#9ea3ab', accent: '#ff9e4a', eyes: '#1d1a1a', ears: 'round', earSize: 1.55, earPos: [0.6, 0.95], nose: '#2a2a2e', noseSize: 2.2, tail: 'none' },
   robo: { label: 'Robo (3D model)', kind: 'model', color: '#9aa7b8', accent: '#ffd23f', eyes: '#000000' },
 };
 
@@ -197,6 +197,7 @@ export class ToonCharacter {
     this.cast = cast;
     this.sp = SPECIES[cast.type] || SPECIES.bunny;
     this.human = this.sp.kind === 'human';
+    this.quad = this.sp.kind === 'animal'; // animals stand and walk on four legs
     this.root = new THREE.Group();
     this.rig = new THREE.Group(); // the whole figure; moves around for run / swing / slide
     this.root.add(this.rig);
@@ -223,6 +224,7 @@ export class ToonCharacter {
     const limb = sp.dark ? mats.fur(sp.dark) : kurta ? dhoti : skin;
     if (sp.adult) this.rig.scale.setScalar(1.3);
     if (sp.baby) this.rig.scale.setScalar(0.72);
+    if (sp.size) this.rig.scale.setScalar(sp.size);
 
     // hierarchy: root > body(hips) > torso, neck>head, shoulders>arms ; root > legs
     const body = new THREE.Group();
@@ -251,6 +253,33 @@ export class ToonCharacter {
       } else {
         Object.assign(this, dressBody(body, outfit, skin)); // sets this.skirt / this.cape when the outfit has them
       }
+    } else if (this.quad) {
+      // on all fours: a long body along +z, the head up front on a short neck
+      body.position.y = QUAD.bodyY;
+      const torso = mesh(capsule(0.155, 0.27, 24), skin);
+      torso.rotation.x = Math.PI / 2;
+      torso.scale.set(1.05, 1, 0.92);
+      body.add(torso);
+      const belly = mesh(sphere(0.13), lightMat, 0, -0.055, 0.02);
+      belly.scale.set(0.95, 0.75, 1.7);
+      body.add(belly);
+      const chest = mesh(sphere(0.12), lightMat, 0, 0.0, 0.2);
+      chest.scale.set(0.9, 0.95, 0.6);
+      body.add(chest);
+      const neckFur = mesh(capsule(0.095, 0.1), skin, 0, 0.13, 0.25);
+      neckFur.rotation.x = 0.45;
+      body.add(neckFur);
+      const collar = mesh(geo('collar', () => new THREE.TorusGeometry(0.105, 0.035, 14, 40)), cloth, 0, 0.1, 0.26);
+      collar.rotation.x = -0.9;
+      body.add(collar);
+      body.add(mesh(sphere(0.035, 14, 10), mats.glossy('#ffd23f', 0.3), 0, 0.03, 0.34)); // a little bell
+      // ground probes: belly, rump and chest (paws are added with the legs)
+      this.probes = [[0, -0.145, 0.12], [0, -0.145, -0.12], [0, -0.06, -0.27], [0, -0.06, 0.27]].map(([x, y, z]) => {
+        const o = new THREE.Object3D();
+        o.position.set(x, y, z);
+        body.add(o);
+        return o;
+      });
     } else {
       body.add(mesh(lathe('tummy', [[0.001, -0.08], [0.12, -0.07], [0.17, 0.03], [0.18, 0.15], [0.16, 0.26], [0.12, 0.33], [0.07, 0.37], [0.001, 0.38]]), skin));
       const belly = mesh(sphere(0.13), lightMat, 0, 0.12, 0.085);
@@ -269,11 +298,13 @@ export class ToonCharacter {
     this.R = R;
     const neck = new THREE.Group();
     neck.position.y = 0.36;
+    if (this.quad) neck.position.set(0, 0.08, 0.22);
     body.add(neck);
     this.neck = neck;
     const head = new THREE.Group();
     head.position.y = 0.23;
     if (sp.baby) { head.scale.setScalar(1.18); head.position.y = 0.25; } // babies: big head
+    if (this.quad) { head.position.set(0, 0.16, 0.08); head.scale.setScalar(0.88); }
     neck.add(head);
     this.head = head;
     const skull = mesh(sphere(R, 64, 48), skin);
@@ -436,6 +467,20 @@ export class ToonCharacter {
       head.add(dot);
     }
 
+    if (this.quad) {
+      this.buildQuadLegs(body, limb, sp.dark ? limb : lightMat);
+      // what it carries goes in its mouth
+      this.mouthGrip = new THREE.Group();
+      this.mouthGrip.position.set(0, -0.12, 0.25);
+      this.mouthGrip.scale.setScalar(0.75);
+      head.add(this.mouthGrip);
+      const tailMount = new THREE.Group();
+      tailMount.position.set(0, 0.04, -0.14);
+      body.add(tailMount);
+      this.buildTail(tailMount, skin, lightMat);
+      return;
+    }
+
     // arms: shoulder > elbow > hand
     this.arms = [-1, 1].map((s) => {
       const shoulder = new THREE.Group();
@@ -485,6 +530,27 @@ export class ToonCharacter {
     });
 
     this.buildTail(body, skin, lightMat);
+  }
+
+  /** Four legs hip > knee > paw: right front, left front, right back, left back. */
+  buildQuadLegs(body, fur, pawMat) {
+    this.legs = [[-1, 1], [1, 1], [-1, -1], [1, -1]].map(([s, f]) => {
+      const hip = new THREE.Group();
+      hip.position.set(s * 0.095, -0.05, f * 0.17);
+      body.add(hip);
+      if (f < 0) hip.add(mesh(sphere(0.085, 24, 16), fur, 0, -0.01, 0)); // haunch
+      hip.add(mesh(capsule(f < 0 ? 0.062 : 0.056, 0.09), fur, 0, -0.07, 0));
+      const knee = new THREE.Group();
+      knee.position.y = -0.14;
+      hip.add(knee);
+      knee.add(mesh(capsule(0.046, 0.08), fur, 0, -0.06, 0));
+      const paw = mesh(sphere(0.056), pawMat, 0, -0.125, 0.02);
+      paw.scale.set(1, 0.6, 1.3);
+      knee.add(paw);
+      this.probes.push(paw);
+      paw.userData.r = 0.034; // its bottom is this far below the centre
+      return { hip, knee, s, front: f > 0 };
+    });
   }
 
   buildEye(head, C, R, s, irisColor, lidMat) {
@@ -774,6 +840,16 @@ export class ToonCharacter {
     if (this.prop) this.prop.removeFromParent();
     this.prop = kind && kind !== 'none' ? buildProp(kind) : null;
     if (!this.prop) return;
+    if (this.quad) {
+      // four legs: a pack rides on the back, anything else is carried in the mouth (no sitar)
+      if (this.prop.userData.onBody) { this.prop = null; return; }
+      if (this.prop.userData.mount === 'back') {
+        this.prop.rotation.x = Math.PI / 2;
+        this.prop.position.set(0, 0.02, -0.12);
+        this.body.add(this.prop);
+      } else this.mouthGrip.add(this.prop);
+      return;
+    }
     if (this.prop.userData.onBody) {
       // resting against the body: bowl on the right knee, neck over the left shoulder
       this.prop.position.set(-0.1, -0.02, 0.2);
@@ -792,11 +868,12 @@ export class ToonCharacter {
     this.prop2Kind = kind;
     if (this.prop2) this.prop2.removeFromParent();
     this.prop2 = kind ? buildProp(kind) : null;
-    if (this.prop2) this.arms[1].grip.add(this.prop2);
+    if (this.prop2) (this.quad ? this.mouthGrip : this.arms[1].grip).add(this.prop2);
   }
 
   /** Pick what's in the hands for this action: the action's own tools, or what the actor holds. */
   equip(action, holds) {
+    if (this.quad) { this.setProp(holds && holds !== 'none' ? holds : null); this.setProp2(null); return; } // no spoons or bats for paws
     const need = ACTION_PROPS[action];
     let right = holds && holds !== 'none' ? holds : null;
     if (need && (need.force || !right)) right = need.right;
@@ -810,13 +887,13 @@ export class ToonCharacter {
 
   /** Where the camera aims for close-ups: steady eye height, lower when sitting, the head when lying. */
   focus(out) {
-    if (this.lying) return this.head.getWorldPosition(out);
+    if (this.lying || this.quad) return this.head.getWorldPosition(out);
     this.rig.getWorldPosition(out);
     out.y = this.root.position.y + this.height * 0.82 + this.low;
     return out;
   }
 
-  get height() { return this.sp.adult ? 1.5 : this.sp.baby ? 0.92 : 1.15; }
+  get height() { return this.quad ? 0.8 * this.rig.scale.y : this.sp.adult ? 1.5 : this.sp.baby ? 0.92 : 1.15; }
 
   // ---------- animation ----------
   /**
@@ -824,6 +901,7 @@ export class ToonCharacter {
    *        face: {brow,tilt,upper,lower,smile,open}, talk: 0..1 amplitude, speaking: bool }
    */
   update(ctx) {
+    if (this.quad) return this.updateQuad(ctx);
     const t = ctx.t;
     const sd = this.seed;
     const p = {
@@ -1171,13 +1249,7 @@ export class ToonCharacter {
         arms: [{ raise: 0.45, fwd: 1.2 + Math.sin(t * 3) * 0.15, elbowZ: 0.25 + Math.sin(t * 4.3) * 0.2, elbowX: -0.5 },
           { raise: 0.25, fwd: 0.7, elbowZ: 0.2, elbowX: -1.2 }] };
       case 'sing': {
-        const g = this.gear.notes;
-        if (g) g.userData.notes.forEach((n, i) => {
-          const k = (t * 0.45 + i / 3) % 1;
-          n.position.set(0.3 + Math.sin(k * 6 + i * 2) * 0.08 - i * 0.05, 1.05 + k * 0.6, 0.05);
-          n.rotation.z = Math.sin(k * 8 + i) * 0.3;
-          n.userData.mat.opacity = Math.sin(k * Math.PI);
-        });
+        this.animateNotes(t, 1.05);
         return { roll: Math.sin(t * 2) * 0.06, nod: -0.08, mouth: 0.25 + Math.abs(Math.sin(t * 4)) * 0.35, propTilt: [-1.0, 0, 0],
           arms: [{ raise: 0.35, fwd: 1.05, elbowZ: -0.3, elbowX: -1.95 }, { raise: 1.0 + Math.sin(t * 1.5) * 0.4, fwd: 0.7, elbowZ: 0.3, elbowX: -0.25 }] };
       }
@@ -1224,6 +1296,185 @@ export class ToonCharacter {
       }
       default: return null;
     }
+  }
+
+  // ---------- four-legged animation ----------
+  updateQuad(ctx) {
+    const { t } = ctx, sd = this.seed;
+    const breath = Math.sin(t * 2.1 + sd);
+    const at = Math.max(0, t - (ctx.actionStart || 0));
+    const blend = smoothstep(0, 0.35, at);
+    const p = {
+      pitch: 0, roll: wobble(t * 0.35, sd) * 0.03, yaw: wobble(t * 0.25, sd + 3) * 0.05, air: 0, bodyY: breath * 0.004, squash: 1 + breath * 0.012,
+      nod: 0, turn: 0, tilt: 0, neck: 0, rigX: 0, rigZ: 0, rigYaw: 0, spin: 0, mouth: 0, eyesClosed: 0, wag: 0,
+      stance: ctx.walking ? 0 : smoothstep(0, 0.6, at), // stand a little side-on to the camera, like an animal does
+      legs: [0, 1, 2, 3].map(() => leg(0)),
+    };
+    this.showGear(ctx.walking ? null : ctx.action);
+    const A = ctx.walking ? null : this.quadPose(ctx.action, at);
+    if (A) mixQuad(p, A, blend);
+    this.A = A;
+    const G = ctx.gesture && !ctx.walking && this.quadGesture(ctx.gesture, ctx.action);
+    if (G) mixQuad(p, G, ctx.gesture.k);
+    const V = ctx.vocal && !ctx.walking && quadVocal(ctx.vocal, t);
+    if (V) mixQuad(p, V, ctx.vocal.k);
+    const walk = ctx.walking || A?.gait;
+    if (walk) this.gait(p, walk);
+
+    const { body, neck, head, rig } = this;
+    const side = this.root.position.x > 0.05 ? -1 : 1;
+    const stanceYaw = side * 0.6 * (1 - smoothstep(0.2, 0.5, Math.abs(this.root.rotation.y))); // already turned to a partner: no need
+    rig.position.set(p.rigX, 0, p.rigZ);
+    rig.rotation.set(0, p.rigYaw + p.spin + p.stance * stanceYaw, 0);
+    body.rotation.set(p.pitch, p.yaw, p.roll);
+    body.scale.set(2 - p.squash, p.squash, 2 - p.squash);
+    // leg angles are given against the ground, so a sitting or bowing body keeps its paws planted
+    this.legs.forEach((l, i) => { l.hip.rotation.set(-p.legs[i].sw - p.pitch, 0, 0); l.knee.rotation.x = p.legs[i].kn; });
+    neck.rotation.x = -p.pitch * 0.8 + p.neck;
+    // stand on whatever is lowest: paws, belly or rump
+    rig.updateWorldMatrix(true, true);
+    let low = Infinity;
+    for (const pr of this.probes) {
+      pr.getWorldPosition(tmpV);
+      this.root.worldToLocal(tmpV);
+      low = Math.min(low, tmpV.y - (pr.userData.r || 0) * rig.scale.y);
+    }
+    rig.position.y = -low + p.air + p.bodyY;
+
+    let yaw = 0, pitch = 0;
+    if (ctx.lookAt && !A?.noLook) {
+      neck.updateWorldMatrix(true, false);
+      tmpV.copy(ctx.lookAt);
+      neck.worldToLocal(tmpV);
+      tmpV.y -= 0.16;
+      yaw = clamp(Math.atan2(tmpV.x, tmpV.z), -1.2, 1.2);
+      pitch = clamp(-Math.atan2(tmpV.y, Math.hypot(tmpV.x, tmpV.z)), -0.45, 0.45);
+    }
+    head.rotation.set(pitch * 0.6 + p.nod, clamp(yaw * 0.8, -1, 1) + p.turn, p.tilt);
+    this.gaze = { yaw: clamp(yaw * 0.3, -0.35, 0.35), pitch: clamp(pitch * 0.4, -0.3, 0.3) };
+
+    this.lying = false;
+    this.low = 0;
+    this.wag = p.wag;
+    this.faceMod = { mouth: p.mouth, eyes: p.eyesClosed };
+    this.applyFace(ctx.face, t, ctx);
+    this.secondary(t, { bodyY: p.bodyY, rootY: p.air, roll: p.roll }, ctx);
+  }
+
+  /** Legs for walking (trot), running (gallop) or, for bunnies, hopping. */
+  gait(p, { phase, speed }) {
+    const run = speed > 2;
+    p.stance = 0; p.yaw = 0;
+    if (this.sp.gait === 'hop') {
+      const s = Math.sin(phase), up = Math.max(0, s), down = Math.max(0, -s);
+      p.air = Math.max(p.air, up * (run ? 0.16 : 0.09));
+      p.pitch = -0.12 * s;
+      p.legs = [0, 1, 2, 3].map((i) => (i < 2 ? leg(0.5 * s, down * 0.4) : leg(-0.6 * s, down * 0.6)));
+      return;
+    }
+    const amp = run ? 0.75 : 0.42;
+    // trot: diagonal pairs together; gallop: front pair then back pair
+    const offs = run ? [0, 0.5, Math.PI, Math.PI + 0.5] : [0, Math.PI, Math.PI, 0];
+    p.legs = offs.map((o) => leg(Math.sin(phase + o) * amp, Math.max(0, Math.cos(phase + o)) * (run ? 1.2 : 0.8)));
+    p.roll = Math.sin(phase) * 0.03;
+    p.nod += Math.sin(phase * 2) * 0.04;
+    if (run) {
+      p.pitch = Math.cos(phase) * 0.1;
+      p.air = Math.max(p.air, Math.max(0, Math.sin(phase - 0.6)) * 0.05);
+    }
+  }
+
+  /** What an action looks like on four legs: sit, lie down, lift a paw, bow, hop, wiggle… */
+  quadPose(action, t) {
+    const TAU = Math.PI * 2;
+    const around = (period, speed, r, step) => {
+      const w = TAU / period;
+      return { rigX: r * Math.sin(t * w), rigYaw: (Math.PI / 2) * clamp(Math.cos(t * w) * 3, -1, 1), stance: 0, gait: { phase: t * step, speed } };
+    };
+    const hop = (f, h) => {
+      const b = Math.abs(Math.sin(t * f));
+      return { air: b * h, squash: 1 + b * 0.04, neck: -0.15, wag: 1, legs: [0, 1, 2, 3].map((i) => leg(i < 2 ? b * 0.4 : -b * 0.4, (1 - b) * 0.35)) };
+    };
+    const paw = (P, l) => ({ ...P, legs: [l, ...P.legs.slice(1)] });
+    switch (action) {
+      case 'wave': case 'salute': { const w = Math.sin(t * 9); return paw({ ...Q_SIT, tilt: 0.15, wag: 1 }, leg(1.5 + w * 0.25, 0.5 + w * 0.35)); }
+      case 'raisehand': return paw({ ...Q_SIT, tilt: 0.1, air: Math.abs(Math.sin(t * 5)) * 0.01 }, leg(2.2 + Math.sin(t * 6) * 0.1, 0.2));
+      case 'point': return paw({ ...Q_STAND, pitch: -0.05, neck: -0.1, wag: 0.3 }, leg(1.3, 0));
+      case 'cricket': { const s = Math.sin(t * 5); return paw(Q_SIT, leg(1.3 + s * 0.4, 0.4 - s * 0.3)); }
+      case 'cheer': case 'jumpingjacks': case 'jumprope': case 'swing': case 'slide': return hop(5, 0.1);
+      case 'jump': {
+        const k = (t % 1.3) / 1.3;
+        const c = k <= 0.3 ? Math.sin((k / 0.3) * Math.PI) : 0, a = k > 0.3 ? Math.sin(((k - 0.3) / 0.7) * Math.PI) : 0;
+        return { air: a * 0.35, pitch: k > 0.3 ? -0.25 * Math.sin(((k - 0.3) / 0.7) * TAU) : c * 0.1, neck: -0.2, wag: 1,
+          legs: [0, 1, 2, 3].map((i) => (i < 2 ? leg(a * 0.9, c * 0.5) : leg(-a * 0.9, c * 0.8))) };
+      }
+      case 'dance': case 'disco': case 'hiphop': case 'twist': case 'bhangra': case 'robot': case 'sidestep': {
+        const b = t * TAU * (action === 'bhangra' ? 1.3 : 1.1), s = Math.sin(b), up = Math.max(0, s), dn = Math.max(0, -s);
+        return { yaw: s * 0.28, roll: -s * 0.08, air: Math.abs(s) * (action === 'bhangra' ? 0.07 : 0.03), nod: Math.abs(s) * 0.12, tilt: s * 0.15, wag: 1,
+          rigX: action === 'sidestep' ? Math.sin(b / 2) * 0.45 : 0,
+          legs: [leg(up * 0.7, up * 0.6), leg(dn * 0.7, dn * 0.6), leg(-s * 0.15), leg(s * 0.15)] };
+      }
+      case 'spin': case 'twirl': return { spin: t * 4.5, stance: 0, pitch: 0.05, wag: 1, gait: { phase: t * 9, speed: 1.3 } }; // chasing its tail
+      case 'laugh': return { ...Q_SIT, roll: Math.sin(t * 22) * 0.03, neck: -0.25 + Math.sin(t * 11) * 0.06, nod: -0.15, squash: 1 + Math.sin(t * 22) * 0.015, wag: 1 };
+      case 'cry': {
+        const sob = Math.abs(Math.sin(t * 7));
+        this.animateTears(t);
+        return { ...Q_LIE, neck: 0.45, nod: 0.25, air: sob * 0.008, mouth: 0.3 + sob * 0.25 };
+      }
+      case 'sad': return { ...Q_LIE, neck: 0.5, nod: 0.3, squash: 0.98 };
+      case 'sick': return { ...Q_LIE, neck: 0.5, nod: 0.3, roll: Math.sin(t * 1.5) * 0.05 };
+      case 'think': return { ...Q_SIT, tilt: 0.25, nod: -0.1, turn: 0.15 };
+      case 'shrug': { const k = Math.sin(clamp((t % 2.6) / 1.1, 0, 1) * Math.PI); return { ...Q_SIT, tilt: 0.3 * k, air: 0.01 * k }; }
+      case 'yes': return { nod: 0.05 + Math.sin(t * 7) * 0.17 * (t % 2.4 < 1.5 ? 1 : 0.15) };
+      case 'no': return { turn: Math.sin(t * 7) * 0.38 * (t % 2.4 < 1.5 ? 1 : 0.1), nod: 0.05 };
+      case 'lookaround': return { turn: Math.sin(t * 1.3) * 0.8, yaw: Math.sin(t * 1.3) * 0.12, neck: -0.15 };
+      case 'stomp': {
+        const s = Math.sin(t * TAU * 1.1), up = Math.max(0, s), dn = Math.max(0, -s);
+        return { pitch: 0.05, nod: 0.1, neck: 0.1, legs: [leg(up * 0.6, up * 0.6), leg(dn * 0.6, dn * 0.6), null, null] };
+      }
+      case 'bow': return Q_BOW;
+      case 'kick': return { ...Q_BOW, air: Math.abs(Math.sin(t * 4)) * 0.05 }; // play-bow, bouncing to pounce
+      case 'clap': { const c = Math.sin(t * 13) * 0.15; return { ...Q_BEG, legs: [leg(0.7 + c, 1.3), leg(0.7 - c, 1.3), Q_BEG.legs[2], Q_BEG.legs[3]] }; }
+      case 'namaste': return { ...Q_BEG, nod: 0.1 };
+      case 'yawn': {
+        const k = Math.sin(clamp((t % 4.5) / 2.6, 0, 1) * Math.PI);
+        return { ...scaleQuad(Q_BOW, k), mouth: 0.9 * k, eyesClosed: k, nod: -0.3 * k, wag: 0 }; // a big stretch
+      }
+      case 'eat': case 'drink': case 'cook': // nose down in the bowl
+        return { neck: 0.8, nod: 0.35, pitch: 0.08, legs: [leg(-0.1), leg(-0.1), null, null], noLook: true, wag: 0.6,
+          mouth: Math.abs(Math.sin(t * (action === 'drink' ? 12 : 8))) * 0.3 };
+      case 'read': return { ...Q_SIT, neck: 0.3, nod: 0.3, noLook: true };
+      case 'sing': // a howl
+        this.animateNotes(t, 0.75);
+        return { ...Q_SIT, neck: -0.35, nod: -0.25, mouth: 0.35 + Math.abs(Math.sin(t * 4)) * 0.4, noLook: true };
+      case 'sitfloor': case 'sitchair': case 'sitcross': case 'study': case 'paint': case 'sitar': case 'rattle': case 'bottle': case 'phone':
+        return Q_SIT;
+      case 'sleep': return { ...Q_LIE, neck: 0.55, nod: 0.25, eyesClosed: 1, noLook: true, mouth: 0.04, squash: 1 + Math.sin(t * 1.6) * 0.025 };
+      case 'crawl': return { ...around(10, 0.8, 0.7, 5), pitch: 0.1, neck: 0.15 }; // sneaking
+      case 'firststeps': case 'walkaround': case 'cart': return around(7, 1.3, 1.1, 7);
+      case 'run': case 'bicycle': return around(3.4, 3.4, 1.3, 10);
+      case 'runjump': {
+        const c = Math.cos((t * TAU) / 3.4);
+        return { ...around(3.4, 3.4, 1.3, 10), air: Math.sin(smoothstep(0.72, 1, Math.abs(c)) * Math.PI / 2) * 0.4 };
+      }
+      case 'brush': case 'washhands': case 'sweep': return { nod: 0.2, turn: Math.sin(t * 1.5) * 0.2, wag: 0.3 };
+      default: return null; // idle: just stand
+    }
+  }
+
+  /** A spoken gesture: standing animals join in with the whole body, others with the head (and a paw). */
+  quadGesture({ action: g, t }, action) {
+    if (g === action || GESTURE_SKIP.has(action)) return null;
+    const G = this.quadPose(g, t);
+    if (!G) return null;
+    const head = { nod: G.nod, turn: G.turn, tilt: G.tilt };
+    if (!this.A) {
+      if (G.gait) return head;
+      const { rigX, rigZ, rigYaw, spin, stance, noLook, ...rest } = G;
+      return rest;
+    }
+    if (['wave', 'salute', 'raisehand', 'point'].includes(g)) head.legs = [G.legs[0], null, null, null];
+    return head;
   }
 
   /** How the body plays a sound in a line. vt: seconds since the sound started. */
@@ -1277,6 +1528,15 @@ export class ToonCharacter {
     }
   }
 
+  animateNotes(t, y0) {
+    this.gear.notes?.userData.notes.forEach((n, i) => {
+      const k = (t * 0.45 + i / 3) % 1;
+      n.position.set(0.3 + Math.sin(k * 6 + i * 2) * 0.08 - i * 0.05, y0 + k * 0.6, 0.05);
+      n.rotation.z = Math.sin(k * 8 + i) * 0.3;
+      n.userData.mat.opacity = Math.sin(k * Math.PI);
+    });
+  }
+
   animateTears(t) {
     const g = this.gear.tears;
     if (!g) return;
@@ -1289,7 +1549,8 @@ export class ToonCharacter {
 
   /** Furniture and moving bits that come with an action (swing, bed, bicycle…), built on first use. */
   showGear(action) {
-    const want = ACTION_GEAR[action];
+    let want = ACTION_GEAR[action];
+    if (this.quad && !QUAD_GEAR.has(want)) want = undefined; // no swings or bicycles on four legs
     if (want && !this.gear[want]) {
       const spec = GEAR[want];
       const g = spec.build ? spec.build() : buildGear(want);
@@ -1396,7 +1657,7 @@ export class ToonCharacter {
     }
     if (this.tail) {
       const wag = this.sp.tail === 'wag';
-      const happy = ctx.face && ctx.face.smile > 0.6;
+      const happy = (ctx.face && ctx.face.smile > 0.6) || this.wag > 0.5;
       this.tail.forEach((seg, i) => {
         seg.rotation.x = wag ? (i === 0 ? -0.9 : -0.2) : (i === 0 ? -1.1 : 0.28);
         seg.rotation.z = wag ? (i === 0 ? Math.sin(t * (happy ? 16 : 5)) * (happy ? 0.6 : 0.25) : 0) : Math.sin(t * 1.6 - i * 0.6) * 0.18;
@@ -1571,6 +1832,59 @@ function mixPose(p, A, k) {
     if (!a) return;
     for (const key in a) p.arms[i][key] = lerp(p.arms[i][key], a[key], k);
   });
+}
+
+// ---------- four-legged poses ----------
+// A leg: sw = swing forward from straight down (against the ground, not the body), kn = knee bend (+ tucks the paw back).
+// Legs are ordered right front, left front, right back, left back.
+const QUAD = { bodyY: 0.34 };
+const QUAD_GEAR = new Set(['notes', 'tears']);
+const leg = (sw, kn = 0) => ({ sw, kn });
+const Q_STAND = { pitch: 0, legs: [leg(0), leg(0), leg(0), leg(0)] };
+const Q_SIT = { pitch: -0.75, neck: -0.05, legs: [leg(0.02), leg(0.02), leg(1.3, 2.8), leg(1.3, 2.8)] };
+const Q_LIE = { pitch: 0, neck: 0.25, legs: [leg(1.4, -0.1), leg(1.4, -0.1), leg(1.25, 2.3), leg(1.25, 2.3)] };
+const Q_BEG = { pitch: -1.2, neck: 0.15, wag: 1, legs: [leg(0.7, 1.3), leg(0.7, 1.3), leg(1.3, 2.8), leg(1.3, 2.8)] }; // up on the haunches
+const Q_BOW = { pitch: 0.6, neck: -0.35, wag: 1, legs: [leg(0.9, -0.75), leg(0.9, -0.75), leg(-0.12), leg(-0.12)] }; // play-bow: chest down, tail up
+const QUAD_KEYS = ['pitch', 'roll', 'yaw', 'air', 'bodyY', 'squash', 'nod', 'turn', 'tilt', 'neck', 'rigX', 'rigZ', 'rigYaw', 'spin', 'stance', 'mouth', 'eyesClosed', 'wag'];
+
+function mixQuad(p, A, k) {
+  for (const key of QUAD_KEYS) if (A[key] !== undefined) p[key] = lerp(p[key], A[key], k);
+  A.legs?.forEach((l, i) => {
+    if (!l) return;
+    p.legs[i] = leg(lerp(p.legs[i].sw, l.sw, k), lerp(p.legs[i].kn, l.kn, k));
+  });
+}
+/** A pose part-way in from standing (k = 0) to full (k = 1). */
+function scaleQuad(P, k) {
+  const out = { legs: P.legs.map((l) => leg(l.sw * k, l.kn * k)) };
+  for (const key of ['pitch', 'neck', 'nod', 'tilt']) if (P[key] !== undefined) out[key] = P[key] * k;
+  return out;
+}
+/** Body language for a laugh / gasp / sob / sigh on four legs. */
+function quadVocal({ sound, t: vt }, t) {
+  switch (sound) {
+    case 'laugh': case 'giggle': case 'hoho': {
+      const shake = Math.abs(Math.sin(t * 17));
+      return { neck: -0.15 + Math.sin(vt * 2.2) * 0.05, nod: -0.12 + shake * 0.06, roll: Math.sin(t * 8.5) * 0.03, bodyY: shake * 0.012, squash: 1 + shake * 0.025, wag: 1 };
+    }
+    case 'gasp': case 'ooh': case 'scream': {
+      const pop = smoothstep(0, 0.12, vt) * (1 - smoothstep(0.5, 1.2, vt) * 0.5);
+      return { neck: -0.25 * pop, nod: -0.12 * pop, air: 0.03 * pop, squash: 1 + 0.05 * pop };
+    }
+    case 'cry': case 'sniff': {
+      const sob = Math.abs(Math.sin(t * 7));
+      return { nod: 0.2, neck: 0.2, bodyY: sob * 0.01, squash: 1 - sob * 0.02 };
+    }
+    case 'sigh': {
+      const k = Math.sin(clamp(vt / 1.2, 0, 1) * Math.PI);
+      return { bodyY: vt < 0.4 ? k * 0.015 : -0.01, nod: vt < 0.4 ? -0.08 * k : 0.16, squash: vt < 0.4 ? 1 + k * 0.03 : 0.97 };
+    }
+    case 'hmm': return { tilt: 0.2, nod: -0.06, turn: 0.1 };
+    case 'angry': return { neck: 0.15, nod: 0.12, pitch: 0.06, squash: 1.03 };
+    case 'yay': return { air: Math.abs(Math.sin(t * 9)) * 0.06, wag: 1 };
+    case 'yawn': return { neck: -0.2, nod: -0.3 };
+    default: return null;
+  }
 }
 
 // ---------- Robo: a rigged glTF model with its own animation clips ----------
