@@ -307,7 +307,7 @@ async function watchEpisode(it) {
   $('pv-note').textContent = 'Making voices…';
   try {
     const story = structuredClone(it.story);
-    const failed = await voices.prepare(story, (d, n) => { if (n && seq === player.seq) $('pv-note').textContent = `Making voices… ${d}/${n}`; });
+    const failed = await voices.prepare(story, (d, n) => { if (n && seq === player.seq) $('pv-note').textContent = `Making voices… ${d}/${n}`; }, { retries: 1 });
     if (seq !== player.seq) return;
     $('pv-note').textContent = 'Building the scene…';
     await document.fonts.load('700 40px Fredoka').catch(() => {});
@@ -320,7 +320,7 @@ async function watchEpisode(it) {
     stage.render(0);
     playerTime();
     playerEnable(true);
-    if (failed) toast(`${failed} line(s) couldn't get a voice (is the internet on?). They show as subtitles.`, 'error');
+    if (failed) toast(`${failed} line(s) couldn't get a voice yet, so they show as subtitles. Press ▶ on the episode again to retry just those lines (rendering retries them by itself).`, 'error');
     playerPlay();
   } catch (err) {
     console.error(err);
@@ -347,25 +347,37 @@ async function renderQueue(items) {
   preview.paused = true; // the live preview would compete with the renderer for the GPU
   renderPlan();
   const step = (msg, pct, eta = '') => { $('render-step').textContent = msg; $('render-bar').style.width = `${pct}%`; $('render-eta').textContent = eta; };
-  let n = 0;
-  for (const it of items) {
-    if (job.cancelled) break;
-    n++;
-    it.status = 'rendering';
-    renderPlan();
-    try {
-      const id = await renderVideo(stage, voices, structuredClone(it.story), $('output'), {
-        onStep: (m, p, eta) => step(`[${n}/${items.length}] ${it.title}: ${m}`, p, eta), isCancelled: () => job.cancelled,
-      });
-      Object.assign(it, { videoId: id, status: 'rendered', error: null });
-      save();
-      if (state.youtube.autoUpload && yt.connected) await queueUpload(it);
-    } catch (err) {
-      Object.assign(it, { status: err.message === 'cancelled' ? 'planned' : 'failed', error: err.message });
-      save();
-      if (err.message === 'cancelled') break;
+  // An episode whose voices still fail after the retries is not rendered (so it's never uploaded with
+  // silent lines); those get one more pass at the end, after a pause for the voice service to recover.
+  let queue = items;
+  for (let pass = 0; pass < 2 && queue.length && !job.cancelled; pass++) {
+    const noVoice = [];
+    if (pass) {
+      for (let s = 60; s > 0 && !job.cancelled; s--) { step(`${queue.length} episode(s) had lines without a voice. Trying them again in ${s}s…`, 0); await new Promise((r) => setTimeout(r, 1000)); }
     }
-    renderPlan();
+    let n = 0;
+    for (const it of queue) {
+      if (job.cancelled) break;
+      n++;
+      it.status = 'rendering';
+      renderPlan();
+      try {
+        const id = await renderVideo(stage, voices, structuredClone(it.story), $('output'), {
+          onStep: (m, p, eta) => step(`[${n}/${queue.length}] ${it.title}: ${m}`, p, eta), isCancelled: () => job.cancelled,
+          allowMissingVoices: false,
+        });
+        Object.assign(it, { videoId: id, status: 'rendered', error: null });
+        save();
+        if (state.youtube.autoUpload && yt.connected) await queueUpload(it);
+      } catch (err) {
+        Object.assign(it, { status: err.message === 'cancelled' ? 'planned' : 'failed', error: err.message });
+        if (/have no voice/.test(err.message)) noVoice.push(it);
+        save();
+        if (err.message === 'cancelled') break;
+      }
+      renderPlan();
+    }
+    queue = noVoice;
   }
   step(job.cancelled ? 'Stopped.' : 'All done!', job.cancelled ? 0 : 100);
   job = null;

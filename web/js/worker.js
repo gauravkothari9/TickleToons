@@ -35,6 +35,7 @@ async function run() {
   try {
     const id = await renderVideo(stage, voices, it.story, document.getElementById('output'), {
       onStep: (msg, pct, eta) => { if (pct - last >= 5 || pct >= 90) { last = pct; status(`${it.key}: ${msg} ${eta || ''}`); } },
+      allowMissingVoices: false, // never upload an episode with silent lines; it goes back in the queue instead
     });
     it.videoId = id;
     await api('/api/worker/done', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: it.key, seed: it.seed, videoId: id }) });

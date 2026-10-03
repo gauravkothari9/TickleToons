@@ -45,11 +45,15 @@ export function newCast(type = 'bunny', name) {
     ...(sp.kind === 'animal' ? { animalSounds: 'auto' } : {}), ...(sp.kind === 'human' ? { vocalSounds: 'auto' } : {}) };
 }
 
-export function newShot(castIds = [], world = 'meadow') {
+/** What a character does when first put in a shot: animals crawl about on all fours. */
+export const defaultAction = (type) => (SPECIES[type]?.kind === 'animal' ? 'crawl' : 'idle');
+
+/** typeOf(castId) gives the character's type, so each one starts with its default action. */
+export function newShot(castIds = [], world = 'meadow', typeOf = () => null) {
   const n = castIds.length;
   return {
     id: uid(), world, camera: 'auto', transition: 'cut', minDuration: 4, music: 'auto', time: 'auto', card: '',
-    actors: castIds.map((castId, i) => ({ castId, x: n === 1 ? 0 : -1.6 + (3.2 * i) / Math.max(1, n - 1), z: 0, action: 'idle', mood: 'happy', holds: 'none', enter: 'none', exit: 'none' })),
+    actors: castIds.map((castId, i) => ({ castId, x: n === 1 ? 0 : -1.6 + (3.2 * i) / Math.max(1, n - 1), z: 0, action: defaultAction(typeOf(castId)), mood: 'happy', holds: 'none', enter: 'none', exit: 'none' })),
     props: [],
     lines: [],
   };

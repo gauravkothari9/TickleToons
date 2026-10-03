@@ -13,7 +13,8 @@ const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(
 
 /**
  * Render `story` with an existing Stage + VoiceLibrary. Returns the new video id.
- * opts: onStep(message, percent, eta), isCancelled(), allowMissingVoices (default true), extraMeta
+ * opts: onStep(message, percent, eta), isCancelled(), allowMissingVoices (default true),
+ *       voiceRetries (extra rounds for lines whose voice failed, default 4), extraMeta
  */
 export async function renderVideo(stage, voices, story, canvas, opts = {}) {
   const step = opts.onStep || (() => {});
@@ -21,7 +22,8 @@ export async function renderVideo(stage, voices, story, canvas, opts = {}) {
   let id = null;
   try {
     step('Making voices…', 2);
-    const failed = await voices.prepare(story, (d, n) => n && step(`Making voices… ${d}/${n}`, 2));
+    const failed = await voices.prepare(story, (d, n, _f, round) => n && step(`Making voices… ${d}/${n}${round ? ` (retry ${round})` : ''}`, 2),
+      { retries: opts.voiceRetries ?? 4 });
     if (failed && opts.allowMissingVoices === false) throw new Error(`${failed} line(s) have no voice`);
     await document.fonts.load('700 40px Fredoka').catch(() => {});
     await document.fonts.load('600 40px Fredoka').catch(() => {});

@@ -173,6 +173,9 @@ def signed(value, unit, lo, hi):
     return f"{value:+d}{unit}"
 
 
+TTS_SLOTS = threading.BoundedSemaphore(6)  # voice requests open at once
+
+
 def make_voice(text, voice, pitch, rate):
     """Return (cache path, error). Cached by content hash so each line is generated once."""
     pitch_s, rate_s = signed(pitch, "Hz", -50, 50), signed(rate, "%", -50, 50)
@@ -182,16 +185,22 @@ def make_voice(text, voice, pitch, rate):
         if path.exists() and path.stat().st_size > 0:
             return path, None
 
+    if not re.search(r"\w", text):  # only punctuation: the voice service sends back no audio
+        return None, "Nothing to say"
     errors = []
     if edge_tts:
         path = TTS_CACHE / f"{key}.mp3"
-        try:
-            asyncio.run(edge_tts.Communicate(text, voice, pitch=pitch_s, rate=rate_s).save(str(path)))
-            if path.stat().st_size > 0:
-                return path, None
-        except Exception as exc:  # network problems etc.
-            errors.append(f"edge-tts: {exc}")
-        path.unlink(missing_ok=True)
+        for attempt in range(3):  # the service drops the odd request, especially in a burst
+            try:
+                with TTS_SLOTS:
+                    asyncio.run(edge_tts.Communicate(text, voice, pitch=pitch_s, rate=rate_s).save(str(path)))
+                if path.stat().st_size > 0:
+                    return path, None
+            except Exception as exc:  # network problems etc.
+                errors.append(f"edge-tts: {exc}")
+            path.unlink(missing_ok=True)
+            if attempt < 2:
+                time.sleep(0.5 * (attempt + 1))
 
     if sys.platform == "win32":  # offline fallback: built-in Windows voices
         path = TTS_CACHE / f"{key}.wav"
@@ -754,6 +763,13 @@ class Handler(SimpleHTTPRequestHandler):
 YT = youtube.YouTube(DATA, VIDEOS, read_meta, write_meta)
 
 
+class Server(ThreadingHTTPServer):
+    # The default backlog is 5: when a story asks for 100+ voices at once, the extra connections were
+    # reset and those lines came back without a voice.
+    request_queue_size = 256
+    daemon_threads = True
+
+
 def main():
     # renders cut off by a previous shutdown can't be resumed
     for meta in all_videos():
@@ -763,7 +779,7 @@ def main():
             write_meta(meta["id"], full)
 
     worker_key()  # made once; deploy/render_worker.py signs in with it
-    server = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
+    server = Server(("127.0.0.1", PORT), Handler)
     url = f"http://127.0.0.1:{PORT}"
     print(f"Tickle Toons Studio running at {url}")
     print(f"FFmpeg: {FFMPEG or 'NOT FOUND - install it to export videos'}")

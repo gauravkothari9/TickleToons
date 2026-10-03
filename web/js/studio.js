@@ -52,15 +52,25 @@ function changed({ ui = true, delay = 350 } = {}) {
   rebuildTimer = setTimeout(rebuild, delay);
 }
 
+/** Lines (by id) that have no voice: they're marked in the Shot tab and the shot strip, with a retry button. */
+let noVoice = new Set();
+function markNoVoice() {
+  for (const el of document.querySelectorAll('[data-novoice]')) el.hidden = !noVoice.has(el.dataset.novoice);
+}
+
 async function rebuild() {
+  clearTimeout(rebuildTimer);
   const seq = ++rebuildSeq;
   const wasPlaying = playing;
   if (playing) pause();
   const snapshot = structuredClone(story);
-  const failed = await voices.prepare(snapshot, (done, total) => {
-    if (total && seq === rebuildSeq) status(`Making voices… ${done}/${total}`);
-  });
+  await voices.prepare(snapshot, (done, total, _f, round) => {
+    if (total && seq === rebuildSeq) status(`Making voices… ${done}/${total}${round ? ' (trying again)' : ''}`);
+  }, { retries: 1 });
   if (seq !== rebuildSeq) return;
+  const missing = voices.missing(snapshot);
+  noVoice = new Set(missing.map((m) => m.line.id));
+  markNoVoice();
   let ok;
   try { ok = await stage.load(snapshot, voices); } catch (err) { console.error(err); status(`Could not build scene: ${err.message}`, 'error'); return; }
   if (!ok || seq !== rebuildSeq) return;
@@ -71,7 +81,11 @@ async function rebuild() {
   updateTime();
   renderStrip();
   renderShotHeader();
-  status(failed ? `${failed} line(s) couldn't get a voice (is the internet on?). They'll still show as subtitles.` : '', failed ? 'error' : '');
+  if (missing.length) {
+    const shots = [...new Set(missing.map((m) => m.shot + 1))];
+    status(`${missing.length} line(s) couldn't get a voice (in shot${shots.length > 1 ? 's' : ''} ${shots.join(', ')}). They show as subtitles for now.`, 'error');
+    $('status').insertAdjacentHTML('beforeend', ' <button class="btn small" data-act="retry-voices">↻ Retry those lines</button>');
+  } else status('');
   if (wasPlaying) play();
 }
 
@@ -91,6 +105,7 @@ const sel = (path, dict, v, extra = '') => `<select data-bind="${path}" ${extra}
 const field = (label, control, cls = '') => `<label class="field ${cls}">${label}${control}</label>`;
 const range = (path, min, max, step, v) => `<input type="range" data-bind="${path}" data-type="num" min="${min}" max="${max}" step="${step}" value="${v}">`;
 const color = (path, v) => `<input type="color" data-bind="${path}" value="${v}">`;
+const typeOf = (castId) => story.cast.find((c) => c.id === castId)?.type;
 const castDict = () => Object.fromEntries(story.cast.map((c) => [c.id, `${c.name} (${S.SPECIES[c.type].label.split(' ')[0]})`]));
 
 function getPath(path) { return path.split('.').reduce((o, k) => o?.[k], story); }
@@ -221,6 +236,8 @@ function lineCard(l, p, i, sh) {
         ${sel(`${p}.gesture`, S.GESTURES, l.gesture || 'auto')}</label>
       ${(l.gesture || 'auto') === 'auto' ? `<span class="muted small" data-gesture-hint>${S.lineGestures(l).map((g) => S.GESTURES[g.action]).join(', ')}</span>` : ''}
       ${warn}
+      <span class="warn no-voice" data-novoice="${l.id}" ${noVoice.has(l.id) ? '' : 'hidden'}>No voice yet (shows as subtitles)
+        <button class="btn small" data-act="retry-line" data-i="${i}">↻ Make this line's voice again</button></span>
     </div>`;
 }
 
@@ -335,7 +352,7 @@ function renderStrip() {
     school: '🏫', classroom: '📚', hospital: '🏥', police: '🚓', mall: '🛍️', market: '🧺', kitchen: '🍳', street: '🏙️', birthday: '🎂', wedding: '💍', reception: '🎊' };
   $('strip').innerHTML = story.shots.map((sh, i) => `
     <div class="shot-card ${i === selected ? 'active' : ''}" data-shot="${i}">
-      <div class="shot-top"><span>${icons[sh.world] || '🎬'} ${i + 1}</span><span class="muted">${tl[i] ? tl[i].duration.toFixed(1) + 's' : ''}</span></div>
+      <div class="shot-top"><span>${icons[sh.world] || '🎬'} ${i + 1}${sh.lines.some((l) => noVoice.has(l.id)) ? ' <span title="Some lines in this shot have no voice">⚠️</span>' : ''}</span><span class="muted">${tl[i] ? tl[i].duration.toFixed(1) + 's' : ''}</span></div>
       <div class="shot-text">${esc(sh.lines[0] ? `${castName(sh.lines[0].castId)}: ${displayText(sh.lines[0].text)}` : S.WORLDS[sh.world])}</div>
       ${i === selected ? `<div class="shot-tools">
         <button class="icon-btn" data-act="shot-left" title="Move earlier" ${i ? '' : 'disabled'}>◀</button>
@@ -344,6 +361,22 @@ function renderStrip() {
         <button class="icon-btn danger" data-act="shot-del" title="Delete" ${story.shots.length > 1 ? '' : 'disabled'}>✕</button>
       </div>` : ''}
     </div>`).join('') + '<button class="shot-card add" data-act="shot-add">+ New shot</button>';
+}
+
+/** Make one line's voice again (the rest of the story is left as it is), then rebuild the scene. */
+async function retryLine(line, btn) {
+  const cast = story.cast.find((c) => c.id === line?.castId);
+  if (!cast) return;
+  btn.disabled = true;
+  btn.textContent = 'Making voice…';
+  try {
+    await voices.load(cast, line.text, line.emotion);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = '↻ Make this line\'s voice again';
+    return status(`That line still has no voice: ${err.message}. Try again in a minute.`, 'error');
+  }
+  return rebuild();
 }
 
 // ---------- editing events ----------
@@ -405,8 +438,8 @@ document.addEventListener('click', (e) => {
       const castId = $('add-actor').value;
       const used = sh.actors.map((a) => a.x);
       const x = [0, -1.6, 1.6, -3, 3].find((v) => !used.some((u) => Math.abs(u - v) < 0.8)) ?? 0;
-      const narrator = story.cast.find((c) => c.id === castId)?.type === 'narrator';
-      sh.actors.push({ castId, x, z: 0, action: narrator ? 'sitcross' : 'idle', mood: narrator ? 'calm' : 'happy', holds: narrator ? 'sitar' : 'none', enter: 'none', exit: 'none' });
+      const narrator = typeOf(castId) === 'narrator';
+      sh.actors.push({ castId, x, z: 0, action: narrator ? 'sitcross' : S.defaultAction(typeOf(castId)), mood: narrator ? 'calm' : 'happy', holds: narrator ? 'sitar' : 'none', enter: 'none', exit: 'none' });
       return changed();
     }
     case 'del-actor': sh.actors.splice(i, 1); return changed();
@@ -447,9 +480,11 @@ document.addEventListener('click', (e) => {
       return changed();
     }
     case 'test-voice': return testVoice(story.cast[i]);
+    case 'retry-voices': btn.disabled = true; return rebuild(); // only the lines without a voice are made again
+    case 'retry-line': return retryLine(sh.lines[i], btn);
     case 'shot-add': {
       const prev = story.shots[selected];
-      const shot = S.newShot(prev.actors.map((a) => a.castId), prev.world);
+      const shot = S.newShot(prev.actors.map((a) => a.castId), prev.world, typeOf);
       story.shots.splice(selected + 1, 0, shot);
       selectShot(selected + 1, false);
       return changed();
@@ -472,7 +507,7 @@ document.addEventListener('click', (e) => {
     case 'new-story':
       if (!confirm('Start a blank story? Your current story will be replaced (save it to a file first if you want to keep it).')) return;
       story = S.normalizeStory({ title: 'My New Story', cast: [S.newCast('bunny'), S.newCast('girl')], shots: [] });
-      story.shots = [S.newShot(story.cast.map((c) => c.id))];
+      story.shots = [S.newShot(story.cast.map((c) => c.id), 'meadow', typeOf)];
       selected = 0; T = 0;
       return changed();
     case 'example-story':
@@ -616,15 +651,19 @@ async function makeVideo() {
   try {
     const snapshot = structuredClone(story);
     step('Making voices…', 2);
-    const failed = await voices.prepare(snapshot, (d, n) => n && step(`Making voices… ${d}/${n}`, 2));
-    if (failed && !confirm(`${failed} line(s) have no voice. Make the video anyway (they'll be subtitles only)?`)) throw new Error('cancelled');
-    const id = await renderVideo(stage, voices, snapshot, $('output'), { onStep: step, isCancelled: () => job.cancelled });
+    const failed = await voices.prepare(snapshot, (d, n, _f, round) => n && step(`Making voices… ${d}/${n}${round ? ` (retry ${round})` : ''}`, 2), { retries: 3 });
+    if (failed) {
+      const shots = [...new Set(voices.missing(snapshot).map((m) => m.shot + 1))].join(', ');
+      if (!confirm(`${failed} line(s) still have no voice (shots ${shots}). Make the video anyway (they'll be subtitles only)?\n\nPress Cancel, then "Retry those lines" under the preview to try again.`)) throw new Error('cancelled');
+    }
+    const id = await renderVideo(stage, voices, snapshot, $('output'), { onStep: step, isCancelled: () => job.cancelled, voiceRetries: 0 });
     location.href = `/?v=${id}`;
   } catch (err) {
     if (err.message !== 'cancelled') status(`Video failed: ${err.message}`, 'error');
     modal.hidden = true;
     renderJob = null;
     stage.setQuality(QUALITY[$('quality').value]);
+    if (err.message === 'cancelled') return rebuild(); // shows which lines still need a voice, with the retry button
     await stage.load(structuredClone(story), voices);
     seek(T);
   }

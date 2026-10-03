@@ -480,6 +480,29 @@ function envelope(buffer) {
   return env;
 }
 
+// A few voice requests at a time: firing every line of a story at once overloaded the server.
+const TTS_AT_ONCE = 6;
+let ttsBusy = 0;
+const ttsWaiting = [];
+async function ttsSlot(fn) {
+  if (ttsBusy >= TTS_AT_ONCE) await new Promise((r) => ttsWaiting.push(r));
+  ttsBusy++;
+  try { return await fn(); } finally { ttsBusy--; ttsWaiting.shift()?.(); }
+}
+
+/** Lines that should be spoken: [{ shot, line, cast }] (shot = index in story.shots). */
+function spokenLines(story) {
+  const castById = Object.fromEntries(story.cast.map((c) => [c.id, c]));
+  const out = [];
+  story.shots.forEach((sh, shot) => {
+    for (const line of sh.lines) {
+      const cast = castById[line.castId];
+      if (cast && line.text.trim()) out.push({ shot, line, cast });
+    }
+  });
+  return out;
+}
+
 export class VoiceLibrary {
   constructor() { this.items = new Map(); this.pending = new Map(); this.clips = new Map(); }
 
@@ -490,14 +513,27 @@ export class VoiceLibrary {
     const key = JSON.stringify([voice, pitch, rate, text]);
     if (!this.clips.has(key)) {
       const p = (async () => {
-        const res = await api('/api/tts', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, voice, pitch, rate }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'voice failed');
-        const bytes = await (await api(data.url)).arrayBuffer();
-        return decoder().decodeAudioData(bytes);
+        // leftovers like "!" or "" (after a laugh or a bark was cut out) have nothing to say
+        if (!/[\p{L}\p{N}]/u.test(text)) return decoder().createBuffer(1, 480, 48000);
+        for (let attempt = 0; ; attempt++) {
+          try {
+            const bytes = await ttsSlot(async () => {
+              const res = await api('/api/tts', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, voice, pitch, rate }),
+              });
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok) throw new Error(data.error || `voice failed (${res.status})`);
+              const file = await api(data.url);
+              if (!file.ok) throw new Error('voice download failed');
+              return file.arrayBuffer();
+            });
+            return await decoder().decodeAudioData(bytes);
+          } catch (err) {
+            if (attempt >= 3 || /log in/i.test(err.message)) throw err;
+            await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt)); // 1, 2, 4 s
+          }
+        }
       })();
       p.catch(() => this.clips.delete(key));
       this.clips.set(key, p);
@@ -587,22 +623,28 @@ export class VoiceLibrary {
     return this.pending.get(key);
   }
 
-  /** Load every line in the story. Missing voices don't block; they fall back to timed text. */
-  async prepare(story, onProgress) {
-    const jobs = [];
-    const castById = Object.fromEntries(story.cast.map((c) => [c.id, c]));
-    for (const shot of story.shots) for (const line of shot.lines) {
-      const cast = castById[line.castId];
-      if (cast && line.text.trim()) jobs.push([cast, line.text, line.emotion]);
+  /** Lines of the story that have no voice yet: [{ shot, line, cast }]. */
+  missing(story) {
+    return spokenLines(story).filter(({ line, cast }) => !this.items.has(voiceKey(cast, line.text, line.emotion)));
+  }
+
+  /**
+   * Load every line in the story; returns how many still have no voice. Missing voices don't block,
+   * they fall back to timed text. `retries` extra rounds try only the missing lines again, waiting
+   * a little longer each time (5 s, 15 s, 30 s, 60 s…) so a hiccup in the voice service passes.
+   */
+  async prepare(story, onProgress, { retries = 0 } = {}) {
+    for (let round = 0; ; round++) {
+      const todo = this.missing(story);
+      let done = 0, failed = 0;
+      onProgress?.(0, todo.length, 0, round);
+      await Promise.all(todo.map(async ({ cast, line }) => {
+        try { await this.load(cast, line.text, line.emotion); } catch { failed++; }
+        onProgress?.(++done, todo.length, failed, round);
+      }));
+      if (!failed || round >= retries) return failed;
+      await new Promise((r) => setTimeout(r, [5, 15, 30, 60][Math.min(round, 3)] * 1000));
     }
-    let done = 0, failed = 0;
-    const todo = jobs.filter(([c, t, e]) => !this.items.has(voiceKey(c, t, e)));
-    onProgress?.(0, todo.length, 0);
-    await Promise.all(todo.map(async ([c, t, e]) => {
-      try { await this.load(c, t, e); } catch { failed++; }
-      onProgress?.(++done, todo.length, failed);
-    }));
-    return failed;
   }
 }
 
