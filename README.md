@@ -38,6 +38,8 @@ Open **📺 Series** (`/series.html`):
 - **Schedule**: posting days and times for long episodes and for Shorts.
 - **Episodes**: *Generate episodes*, check any in the studio (✎), then *Render all*. Keep the tab open while it renders.
 - **YouTube**: one-time Google setup (steps on the page), then uploads are automatic and scheduled.
+- **Automatic rendering**: run `deploy\local-renderer.ps1` once on a PC with a graphics card; it renders each episode
+  shortly before its publish time (Schedule tab) and the server uploads it, scheduled. See `deploy/DEPLOY.md`.
 
 Stories come from hand-written templates in `web/js/series/` (no AI): `stories-long.js` and `stories-long-2.js`
 (one complete story each, one genre, with its own optional scenes that are cut when an episode would run long; nothing

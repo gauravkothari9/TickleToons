@@ -24,9 +24,14 @@ On this PC (`start.bat`) there is no login.
 
 ## Works while your laptop is off
 
-- **Rendering happens in your browser** (Series → Render all), because it needs a graphics card. The frames go
-  straight to the server, which makes the MP4. Render a batch ahead of time (e.g. a week of episodes), then the
-  laptop can be off.
+- **Rendering needs a graphics card**, so it happens on a PC, not on AWS. The frames go straight to the server,
+  which makes the MP4. Two ways:
+  - **Automatic, on schedule:** run `powershell -ExecutionPolicy Bypass -File deploy\local-renderer.ps1` once on
+    the PC. A hidden task (*Tickle Toons renderer*, starts at logon) renders each planned episode when its publish
+    time is less than *N* hours away (Series → Schedule → Automatic rendering, default 24), using headless Edge
+    and the PC's GPU, and keeps the PC from sleeping mid-render. Overdue episodes go first when the PC comes back.
+    Log: `data\renderer.log`. Remove with `... local-renderer.ps1 -Remove`.
+  - **By hand:** Series → Render all renders everything now, in the open tab.
 - **Uploading:** with **auto-upload** on and YouTube connected, each rendered episode is queued and uploaded by the
   server. Scheduled episodes go up as private with a publish time, and YouTube makes them public at that time.
 - The `tickletoons-renderer` service (a headless Chromium on the server that renders planned episodes by itself) is

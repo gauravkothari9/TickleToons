@@ -21,6 +21,7 @@ import threading
 import time
 import uuid
 import webbrowser
+from datetime import datetime
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs, quote
@@ -342,6 +343,7 @@ def check_password(password):
 WORKER_KEY_FILE = DATA / "worker.key"
 CLAIM_HOURS = 8          # a render that hasn't reported back by then is tried again
 MAX_SERVER_TRIES = 3
+RENDER_AHEAD_HOURS = 24  # an episode is rendered this long before it goes live (Schedule tab can change it)
 
 
 def worker_key():
@@ -385,13 +387,24 @@ def keep_server_progress(new, old):
                 it[k] = o[k]
 
 
+def due(it, now, ahead_hours):
+    """Its turn to render: no publish time, or the publish time is less than ahead_hours away (or past)."""
+    try:
+        publish = datetime.fromisoformat(str(it["publishAt"]).replace("Z", "+00:00")).timestamp()
+    except (KeyError, TypeError, ValueError):
+        return True
+    return publish - now <= ahead_hours * 3600
+
+
 def claim_episode():
-    """Pick the next planned episode to render (soonest publish time first) and mark it as taken."""
+    """Pick the next planned episode whose turn has come (soonest publish time first) and mark it as taken."""
     with series_lock:
         data = load_series()
         now = time.time()
+        ahead = (data.get("schedule") or {}).get("renderAhead")
+        ahead = float(ahead) if isinstance(ahead, (int, float)) and ahead > 0 else RENDER_AHEAD_HOURS
         free = [it for it in data.get("plan") or [] if isinstance(it, dict) and it.get("story") and not it.get("videoId")
-                and it.get("serverTries", 0) < MAX_SERVER_TRIES
+                and it.get("serverTries", 0) < MAX_SERVER_TRIES and due(it, now, ahead)
                 and not (it.get("status") == "rendering" and now - (it.get("serverClaim") or now) < CLAIM_HOURS * 3600)]
         if not free:
             return None, data

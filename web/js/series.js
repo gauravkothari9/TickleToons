@@ -17,7 +17,7 @@ const CATEGORIES = { 1: 'Film & Animation', 27: 'Education', 24: 'Entertainment'
 
 const DEFAULT_STATE = {
   settings: DEFAULT_SETTINGS,
-  schedule: { enabled: true, startDate: new Date(Date.now() + 86400000).toISOString().slice(0, 10), longDays: [3, 6], longTime: '17:00', shortDays: [0, 1, 2, 3, 4, 5, 6], shortTimes: ['12:00'] },
+  schedule: { enabled: true, startDate: new Date(Date.now() + 86400000).toISOString().slice(0, 10), longDays: [3, 6], longTime: '17:00', shortDays: [0, 1, 2, 3, 4, 5, 6], shortTimes: ['12:00'], renderAhead: 24 },
   youtube: { autoUpload: false, privacy: 'private', madeForKids: true, categoryId: '1' },
   bible: null, // your edits on top of the default family
   plan: [],
@@ -554,7 +554,9 @@ function renderSchedule() {
       ${field('Times (comma separated, e.g. 12:00, 19:00)', `<input type="text" data-bind="schedule.shortTimes" data-type="list" data-rerender="1" value="${esc(s.shortTimes.join(', '))}">`)}
       <p class="muted small">Times are your computer's time zone (${esc(Intl.DateTimeFormat().resolvedOptions().timeZone)}). The schedule applies when you press <b>Generate episodes</b>; you can change any single date in the Episodes list.</p>
       <p class="small"><b>Next slots:</b> ${preview.map(esc).join(' · ') || '<span class="muted">none</span>'}</p>
-      <p class="muted small">YouTube publishes scheduled videos itself, so your computer doesn't need to be on at that time. Rendering and uploading do need this page open.</p>
+      <h3>Automatic rendering</h3>
+      ${field('Render each episode this many hours before it goes live', `<input type="number" data-bind="schedule.renderAhead" data-type="num" min="1" max="720" value="${s.renderAhead ?? 24}">`)}
+      <p class="muted small">With the renderer running (<code>deploy\\local-renderer.ps1</code> on a PC with a graphics card), each planned episode is rendered when its time comes close, then uploaded to YouTube as scheduled (with <b>auto-upload</b> on). YouTube makes it public at the exact time. If the PC was off, overdue episodes are rendered as soon as it's back on. <b>Render all</b> on the Episodes tab still renders everything right away.</p>
     </div>`;
 }
 
