@@ -31,12 +31,32 @@ On this PC (`start.bat`) there is no login.
     time is less than *N* hours away (Series → Schedule → Automatic rendering, default 24), using headless Edge
     and the PC's GPU, and keeps the PC from sleeping mid-render. Overdue episodes go first when the PC comes back.
     Log: `data\renderer.log`. Remove with `... local-renderer.ps1 -Remove`.
+    Before each render it also tops up the plan (Series → Schedule → Autopilot): every schedule slot in the next
+    2 days without an episode gets a new story, in this PC's time zone. Stories already made are not made again.
   - **By hand:** Series → Render all renders everything now, in the open tab.
 - **Uploading:** with **auto-upload** on and YouTube connected, each rendered episode is queued and uploaded by the
   server. Scheduled episodes go up as private with a publish time, and YouTube makes them public at that time.
 - The `tickletoons-renderer` service (a headless Chromium on the server that renders planned episodes by itself) is
   installed but **off**: this server has no graphics card, and a test took over 15 minutes for 3 seconds of video.
   It only makes sense on a GPU instance. Turn it on with `sudo systemctl enable --now tickletoons-renderer`.
+
+## GPU renderer (no PC needed)
+
+`tickletoons-gpu`: a g4dn.xlarge (NVIDIA T4) that is **stopped** except while it renders. Every 5 minutes the
+main server checks for episodes that are due (Series → Schedule → Automatic rendering); if there are any, it starts
+the GPU instance (at most once every 30 minutes). That instance runs `deploy/render_worker.py` at boot with the
+graphics card, renders everything due, and switches itself off. It is switched off after 4 hours whatever happens.
+The PC renderer can keep running too: both take episodes from the same queue.
+
+- **Set up / update:** `node deploy\aws-gpu-provision.mjs` (creates the instance and the `tickletoons-server` role
+  that lets the main server start it, installs the renderer, starts it once). Then `deploy\update.ps1` so the server
+  has boto3. Needs `@aws-sdk/client-ec2` and `@aws-sdk/client-iam` (`AWS_SDK_FROM`).
+- **First:** a new AWS account may run 0 GPU instances. In Service Quotas → EC2 (ap-south-1), request
+  *Running On-Demand G and VT instances* = **4**.
+- **Cost:** about $0.58/hour on demand, so roughly $20–25/month at about an hour a day, plus about $5/month for its
+  disk. Spot is about $0.22/hour (`GPU_SPOT=1` when creating it). It needs the EC2 Spot service-linked role, which an
+  admin creates once.
+- **Logs:** `sudo journalctl -u tickletoons-gpu-renderer` on the GPU instance; `[gpu]` lines in the server log.
 
 ## YouTube on the server
 

@@ -43,7 +43,7 @@ echo "==> Python environment"
 # only the server lives here: pages (on Vercel) and story-writing tools from older installs go
 rm -rf "$APP_DIR/web" "$APP_DIR/tools" "$APP_DIR/stories" "$APP_DIR/README.md" "$APP_DIR/deploy/login.txt"
 chown -R "$APP_USER:$APP_USER" "$APP_DIR"
-sudo -u "$APP_USER" -H bash -c "cd '$APP_DIR' && { [[ -x .venv/bin/python ]] || python3 -m venv .venv; } && .venv/bin/pip install -q -r requirements.txt playwright"
+sudo -u "$APP_USER" -H bash -c "cd '$APP_DIR' && { [[ -x .venv/bin/python ]] || python3 -m venv .venv; } && .venv/bin/pip install -q -r requirements.txt playwright boto3"
 
 echo "==> Headless Chromium for the renderer"
 "$APP_DIR/.venv/bin/playwright" install-deps chromium >/dev/null

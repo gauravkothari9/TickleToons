@@ -6,7 +6,7 @@ import { CharacterPreview } from './preview.js';
 import { renderVideo } from './render.js';
 import { OUTFITS, ACTIONS } from './story.js';
 import { LANGUAGES, LOOKS, FAMILY, mergeBible, castMember, nameOf, DEFAULT_BIBLE } from './series/bible.js';
-import { THEMES, DEFAULT_SETTINGS, makePlan, generateEpisode, scheduleSlots } from './series/generator.js';
+import { THEMES, DEFAULT_SETTINGS, makePlan, generateEpisode, scheduleSlots, nextStory, storiesLeft } from './series/generator.js';
 requireLogin(); // off to the login page if the server wants one
 
 const $ = (id) => document.getElementById(id);
@@ -17,7 +17,7 @@ const CATEGORIES = { 1: 'Film & Animation', 27: 'Education', 24: 'Entertainment'
 
 const DEFAULT_STATE = {
   settings: DEFAULT_SETTINGS,
-  schedule: { enabled: true, startDate: new Date(Date.now() + 86400000).toISOString().slice(0, 10), longDays: [3, 6], longTime: '17:00', shortDays: [0, 1, 2, 3, 4, 5, 6], shortTimes: ['12:00'], renderAhead: 24 },
+  schedule: { enabled: true, startDate: new Date(Date.now() + 86400000).toISOString().slice(0, 10), longDays: [3, 6], longTime: '17:00', shortDays: [0, 1, 2, 3, 4, 5, 6], shortTimes: ['12:00'], renderAhead: 24, autoPlan: true, planDays: 2, repeatStories: false },
   youtube: { autoUpload: false, privacy: 'private', madeForKids: true, categoryId: '1' },
   bible: null, // your edits on top of the default family
   plan: [],
@@ -27,6 +27,8 @@ let voiceList = [];
 let yt = { configured: false, connected: false };
 let uploads = [];
 let job = null; // { cancelled }
+const CLAIM_HOURS = 3; // as in server.py: a render that is silent for this long is free again
+let planRev = 0; // the server's plan version this page has; episodes the autopilot added later survive our saves
 
 const stage = new Stage($('output'));
 const voices = new VoiceLibrary();
@@ -45,12 +47,21 @@ function flushSave() {
   clearTimeout(saveTimer);
   if (!dirty) return saving;
   dirty = false;
-  const body = JSON.stringify({ ...state, rev: Date.now() });
+  const body = JSON.stringify({ ...state, rev: Date.now(), baseRev: planRev });
   inFlight++;
   saving = saving.then(async () => {
     try {
       const res = await api('/api/series', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
-      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `server said ${res.status}`);
+      const out = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(out.error || `server said ${res.status}`);
+      if (typeof out.planRev === 'number') planRev = Math.max(planRev, out.planRev);
+      const have = new Set(state.plan.map((p) => p.key));
+      const kept = (out.kept || []).filter((p) => !have.has(p.key));
+      if (kept.length) {
+        state.plan.push(...kept);
+        if (out.usedStories) state.usedStories = out.usedStories;
+        renderPlan();
+      }
     } catch (err) {
       dirty = true; // try again with the next change
       toast(`Couldn't save your changes: ${err.message}`, 'error');
@@ -205,18 +216,21 @@ function generate() {
     state.plan.forEach(remember);
     const done = new Set(keep.map((p) => p.key));
     const fresh = makePlan(state.settings, state.bible, state.schedule, used).map((p) => ({ ...p, key: `${state.settings.seed}-${p.key}` })).filter((p) => !done.has(p.key));
+    // the stories this replaces were never made into a video: they are skipped for this set only, not used up
+    const made = new Set([...keep, ...fresh].map((p) => p.template));
+    for (const p of state.plan) if (!p.videoId && !p.repeat && !made.has(p.template)) used[p.kind] = used[p.kind].filter((id) => id !== p.template);
     fresh.forEach(remember);
-    renderSettings();
     state.plan = [...keep, ...fresh];
     save(true);
-    renderPlan();
-    toast(`Made ${fresh.length} episodes. Open any of them in the studio to check, then press Render all.`);
+    renderAll();
+    const again = fresh.filter((p) => p.repeat).length;
+    toast(`Made ${fresh.length} episodes. ${again ? `${again} of them are stories you've had before: every other story has been used.` : 'Open any of them in the studio to check, then press Render all.'}`, again ? 'error' : '');
   } catch (err) { toast(err.message, 'error'); }
 }
 
-function regenerate(it, seed = it.seed) {
-  const ep = generateEpisode({ seed, kind: it.kind, lang: it.lang, settings: state.settings, bibleOverrides: state.bible, templateId: seed === it.seed ? it.template : undefined });
-  return { ...it, ...ep.meta, story: ep.story, seed, template: ep.meta.template, status: 'planned', error: null };
+function regenerate(it, seed = it.seed, next = { template: it.template, vlog: it.vlog, repeat: it.repeat }) {
+  const ep = generateEpisode({ seed, kind: it.kind, lang: it.lang, settings: state.settings, bibleOverrides: state.bible, templateId: next.template, vlog: !!next.vlog });
+  return { ...it, ...ep.meta, story: ep.story, seed, template: ep.meta.template, status: 'planned', error: null, repeat: next.repeat || undefined };
 }
 
 document.addEventListener('click', async (e) => {
@@ -230,9 +244,13 @@ document.addEventListener('click', async (e) => {
       save(true); renderPlan(); return toast('Unrendered stories updated with your latest family and settings.');
     case 'reroll': {
       const seed = it.seed + 7777 + Math.floor(Math.random() * 1000);
+      // a story that hasn't been made yet; the one it replaces was never rendered, so it isn't used up
+      const used = state.usedStories ||= { long: [], short: [] };
+      const next = nextStory(it.kind, !!it.vlog, state.settings, [...new Set([...(used[it.kind] || []), ...state.plan.map((p) => p.template)])], seed);
       // re-roll the same episode in every language together
       const base = it.key.replace(/-(\w+)$/, '');
-      state.plan = state.plan.map((p) => (p.key.startsWith(base + '-') && !p.videoId ? regenerate(p, seed) : p));
+      state.plan = state.plan.map((p) => (p.key.startsWith(base + '-') && !p.videoId ? regenerate(p, seed, next) : p));
+      used[it.kind] = [...(used[it.kind] || []).filter((id) => id !== next.template && (id !== it.template || it.repeat || state.plan.some((p) => p.template === id))), next.template];
       save(true); return renderPlan();
     }
     case 'remove': state.plan.splice(i, 1); save(true); return renderPlan();
@@ -336,6 +354,22 @@ $('ep-scrub').addEventListener('input', (e) => {
 });
 
 // ---------- batch rendering ----------
+// What the renderer (deploy/render_worker.py) did since this page loaded. An episode it has rendered
+// gets its video here; the keys of the ones it is rendering right now are returned. Neither is rendered again.
+async function serverProgress() {
+  const busy = new Set();
+  try {
+    const saved = await (await api('/api/series')).json();
+    for (const o of saved?.plan || []) {
+      const it = state.plan.find((p) => p.key === o.key && p.seed === o.seed && p.template === o.template);
+      if (!it || it.videoId) continue;
+      if (o.videoId) Object.assign(it, { videoId: o.videoId, status: 'rendered', error: null });
+      else if (o.status === 'rendering' && o.serverClaim && Date.now() / 1000 - o.serverClaim < CLAIM_HOURS * 3600) busy.add(it.key);
+    }
+  } catch { /* server busy: carry on with what this page knows */ }
+  return busy;
+}
+
 async function renderQueue(items) {
   if (job) return;
   ++player.seq; // cancel a preview that's still loading
@@ -359,18 +393,21 @@ async function renderQueue(items) {
     for (const it of queue) {
       if (job.cancelled) break;
       n++;
-      it.status = 'rendering';
+      const busy = await serverProgress();
+      if (it.videoId || busy.has(it.key)) { renderPlan(); continue; }
+      Object.assign(it, { status: 'rendering', pageClaim: Date.now() / 1000 }); // saved, so the renderer leaves it alone
+      save(true);
       renderPlan();
       try {
         const id = await renderVideo(stage, voices, structuredClone(it.story), $('output'), {
           onStep: (m, p, eta) => step(`[${n}/${queue.length}] ${it.title}: ${m}`, p, eta), isCancelled: () => job.cancelled,
           allowMissingVoices: false,
         });
-        Object.assign(it, { videoId: id, status: 'rendered', error: null });
+        Object.assign(it, { videoId: id, status: 'rendered', error: null, pageClaim: undefined });
         save();
         if (state.youtube.autoUpload && yt.connected) await queueUpload(it);
       } catch (err) {
-        Object.assign(it, { status: err.message === 'cancelled' ? 'planned' : 'failed', error: err.message });
+        Object.assign(it, { status: err.message === 'cancelled' ? 'planned' : 'failed', error: err.message, pageClaim: undefined });
         if (/have no voice/.test(err.message)) noVoice.push(it);
         save();
         if (err.message === 'cancelled') break;
@@ -539,6 +576,7 @@ function renderSettings() {
 function renderSchedule() {
   const s = state.schedule;
   const dayChecks = (path) => DAYS.map((d, i) => `<label class="check day"><input type="checkbox" data-bind="${path}" data-type="toggle" data-num="1" value="${i}" ${(getPath(state, path) || []).includes(i) ? 'checked' : ''}> ${d}</label>`).join('');
+  const left = storiesLeft(state.settings, state.usedStories);
   const preview = [...scheduleSlots(s, 'long', 4), ...scheduleSlots(s, 'short', 4)].filter(Boolean).sort().slice(0, 6)
     .map((t) => new Date(t).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }));
   $('tab-schedule').innerHTML = `
@@ -554,6 +592,12 @@ function renderSchedule() {
       ${field('Times (comma separated, e.g. 12:00, 19:00)', `<input type="text" data-bind="schedule.shortTimes" data-type="list" data-rerender="1" value="${esc(s.shortTimes.join(', '))}">`)}
       <p class="muted small">Times are your computer's time zone (${esc(Intl.DateTimeFormat().resolvedOptions().timeZone)}). The schedule applies when you press <b>Generate episodes</b>; you can change any single date in the Episodes list.</p>
       <p class="small"><b>Next slots:</b> ${preview.map(esc).join(' · ') || '<span class="muted">none</span>'}</p>
+      <h3>Autopilot</h3>
+      <label class="check"><input type="checkbox" data-bind="schedule.autoPlan" ${s.autoPlan !== false ? 'checked' : ''}> Write new episodes by itself for every slot above</label>
+      ${field('Keep this many days planned ahead', `<input type="number" data-bind="schedule.planDays" data-type="num" min="1" max="14" value="${s.planDays ?? 2}">`)}
+      <label class="check"><input type="checkbox" data-bind="schedule.repeatStories" ${s.repeatStories ? 'checked' : ''}> When every story has been made, start again with the oldest ones (the same videos again)</label>
+      <p class="small ${left.long && left.short ? '' : 'warn-text'}"><b>Stories not made yet:</b> ${left.long} long · ${left.short} Shorts</p>
+      <p class="muted small">The renderer (below) checks every few minutes and fills any empty slot in the next days with a new story, so as soon as one set is rendered the next is written and rendered too. A story that has been made is never made again: when none are left, that kind stops until there are new stories or you tick the box above. A kind set to 0 videos in Settings is left out. Set the number of Shorts per day with the times above (e.g. three times for three Shorts) and tick every day for a daily long episode. Episodes from more than 14 days ago leave the list (their videos stay in the gallery and on YouTube).</p>
       <h3>Automatic rendering</h3>
       ${field('Render each episode this many hours before it goes live', `<input type="number" data-bind="schedule.renderAhead" data-type="num" min="1" max="720" value="${s.renderAhead ?? 24}">`)}
       <p class="muted small">With the renderer running (<code>deploy\\local-renderer.ps1</code> on a PC with a graphics card), each planned episode is rendered when its time comes close, then uploaded to YouTube as scheduled (with <b>auto-upload</b> on). YouTube makes it public at the exact time. If the PC was off, overdue episodes are rendered as soon as it's back on. <b>Render all</b> on the Episodes tab still renders everything right away.</p>
@@ -622,10 +666,14 @@ async function init() {
   try { voiceList = await (await api('/api/voices')).json(); } catch { voiceList = []; }
   try {
     const saved = await (await api('/api/series')).json();
+    planRev = saved?.planRev || 0;
     if (saved && saved.settings) state = { ...structuredClone(DEFAULT_STATE), ...saved, settings: { ...DEFAULT_SETTINGS, ...saved.settings }, schedule: { ...DEFAULT_STATE.schedule, ...saved.schedule }, youtube: { ...DEFAULT_STATE.youtube, ...saved.youtube } };
   } catch { /* first run */ }
   // a render cut off by closing the tab can be done again
-  for (const it of state.plan) if (it.status === 'rendering') it.status = 'planned';
+  for (const it of state.plan) {
+    delete it.pageClaim;
+    if (it.status === 'rendering' && !(it.serverClaim && Date.now() / 1000 - it.serverClaim < CLAIM_HOURS * 3600)) it.status = 'planned';
+  }
   await refreshYouTube();
   await refreshUploads();
   stage.setQuality({ scale: 0.4, effects: false });

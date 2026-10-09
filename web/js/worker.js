@@ -7,6 +7,7 @@ import { Stage } from './engine/stage.js';
 import { VoiceLibrary } from './engine/audio.js';
 import { renderVideo } from './render.js';
 import { LANGUAGES } from './series/bible.js';
+import { topUpPlan } from './series/generator.js';
 
 const key = new URLSearchParams(location.search).get('k');
 if (key) setToken(key);
@@ -24,7 +25,20 @@ async function queueUpload(it, youtube) {
   if (!res.ok) throw new Error(`upload not queued: ${(await res.json().catch(() => ({}))).error || res.status}`);
 }
 
+// Autopilot: write new episodes for the schedule slots of the next few days that don't have one yet
+// (Series > Schedule). Times are this PC's time zone, like on the Series page.
+async function topUp() {
+  const state = await (await api('/api/series')).json();
+  const next = state?.settings && topUpPlan(state);
+  if (next?.outOf.length) status(`Autopilot: every ${next.outOf.map((k) => (k === 'short' ? 'Shorts' : 'long')).join(' and ')} story has been made already (Series > Schedule can allow repeats).`);
+  if (!next || (!next.items.length && !state.plan?.some((p) => p.publishAt && new Date(p.publishAt) < Date.now() - 14 * 864e5))) return;
+  const res = await api('/api/worker/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) });
+  const { added } = await res.json();
+  if (added) status(`Autopilot: planned ${added} new episode${added === 1 ? '' : 's'}.`);
+}
+
 async function run() {
+  try { await topUp(); } catch (err) { status(`autopilot: ${err.message}`); } // rendering what's planned matters more
   const claim = await (await api('/api/worker/claim', { method: 'POST' })).json();
   const it = claim.item;
   if (!it) { status('Nothing to render.'); return { idle: true }; }

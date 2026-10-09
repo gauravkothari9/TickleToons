@@ -382,6 +382,16 @@ function youtubeText(ep, c, settings, template, kind) {
 // ---------- the plan: many episodes, with publish times ----------
 const DAY = 24 * 3600 * 1000;
 
+/** '17:00', '5:30 pm', '23:30pm', '11 am' -> [hours, minutes]. */
+export function parseTime(hm) {
+  const t = String(hm || '17:00').trim().toLowerCase().match(/^(\d{1,2})(?:[:.](\d{1,2}))?\s*(am|pm)?/);
+  if (!t) return [17, 0];
+  let h = Number(t[1]) % 24;
+  if (t[3] === 'pm' && h < 12) h += 12;
+  if (t[3] === 'am' && h === 12) h = 0;
+  return [h, Math.min(Number(t[2]) || 0, 59)];
+}
+
 /** Publish slots from the schedule settings, starting from startDate (local time). */
 export function scheduleSlots(schedule, kind, count, now = Date.now()) {
   const out = [];
@@ -393,8 +403,8 @@ export function scheduleSlots(schedule, kind, count, now = Date.now()) {
     const day = new Date(start.getTime() + d * DAY);
     if (!days?.includes(day.getDay())) continue;
     for (const hm of times || []) {
-      const [h, m] = String(hm || '17:00').split(':').map(Number);
-      const at = new Date(day.getFullYear(), day.getMonth(), day.getDate(), h || 0, m || 0);
+      const [h, m] = parseTime(hm);
+      const at = new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m);
       if (at.getTime() > now + 20 * 60 * 1000 && out.length < count) out.push(at.toISOString());
     }
   }
@@ -408,42 +418,101 @@ function poolFor(kind, vlog, settings) {
     : (kind === 'short' ? SHORT_TEMPLATES : LONG_TEMPLATES).filter((t) => settings.themes.includes(t.theme));
 }
 
+/** The pools an episode can draw from: the one asked for first, then the other (vlogs only when you have any). */
+function poolsFor(kind, vlog, settings) {
+  const regular = poolFor(kind, false, settings);
+  if (!regular.length) throw new Error('No story themes selected.');
+  const vlogs = (settings.vlogPercent ?? 10) > 0 ? poolFor(kind, true, settings) : [];
+  return vlog && vlogs.length ? [[vlogs, true], [regular, false]] : [[regular, false], [vlogs, true]];
+}
+
+/**
+ * The story for a new episode: one that isn't in `used` (template ids, oldest first). A story is one
+ * video: the same story again is the same video again, so a used one is never picked while another is
+ * left. When all are used: the one used longest ago (repeat: true), or null when repeats are off.
+ */
+export function nextStory(kind, vlog, settings, used, seed, repeats = true) {
+  const pools = poolsFor(kind, vlog, settings);
+  for (const [pool, isVlog] of pools) {
+    const fresh = pool.filter((t) => !used.includes(t.id));
+    if (fresh.length) return { template: fresh[Math.floor(rng(seed * 31 + 7)() * fresh.length)].id, vlog: isVlog, repeat: false };
+  }
+  if (!repeats) return null;
+  const [pool, isVlog] = pools[0];
+  return { template: [...pool].sort((a, b) => used.indexOf(a.id) - used.indexOf(b.id))[0].id, vlog: isVlog, repeat: true };
+}
+
+/** How many stories haven't been made yet: { long, short }. */
+export function storiesLeft(settings, used = {}) {
+  const left = (kind) => poolsFor(kind, false, settings).flatMap(([pool]) => pool).filter((t) => !(used[kind] || []).includes(t.id)).length;
+  try { return { long: left('long'), short: left('short') }; } catch { return { long: 0, short: 0 }; }
+}
+
 /**
  * Plan every video: N long + M shorts, each in every chosen language, with publish times.
  * avoid: { long: [templateIds], short: [templateIds] } used in earlier batches, oldest first. Those
- * stories are skipped; when a pool is used up, its older half becomes available again.
+ * stories are skipped. When every story has been used, the oldest come round again (marked repeat),
+ * or with repeats = false the episode is left out.
  */
-export function makePlan(settings, bibleOverrides, schedule, avoid = {}) {
+export function makePlan(settings, bibleOverrides, schedule, avoid = {}, given = null, repeats = true) {
   const items = [];
   const langs = settings.languages?.length ? settings.languages : ['en'];
   for (const kind of ['long', 'short']) {
-    const count = kind === 'long' ? settings.long.count : settings.shorts.count;
-    const slots = scheduleSlots(schedule, kind, count * langs.length);
+    const count = given ? Math.ceil(given[kind].length / langs.length) : kind === 'long' ? settings.long.count : settings.shorts.count;
+    const slots = given ? given[kind] : scheduleSlots(schedule, kind, count * langs.length);
     let used = [...(avoid[kind] || [])];
     for (let i = 0; i < count; i++) {
-      let seed = (settings.seed || 1) * 1000 + i + (kind === 'short' ? 500 : 0);
+      const seed = (settings.seed || 1) * 1000 + i + (kind === 'short' ? 500 : 0);
       const pct = (settings.vlogPercent ?? 10) / 100;
-      const vlog = Math.floor((i + 1) * pct) > Math.floor(i * pct);
-      // all used up: free the older half, keep the newest blocked so stories don't repeat back to back
-      const pool = poolFor(kind, vlog, settings);
-      if (pool.length && pool.every((t) => used.includes(t.id))) {
-        const ids = new Set(pool.map((t) => t.id));
-        const inPool = used.filter((id) => ids.has(id));
-        const free = new Set(inPool.slice(0, Math.ceil(inPool.length / 2)));
-        used = used.filter((id) => !free.has(id));
-      }
-      let first = generateEpisode({ seed, kind, lang: 'en', settings, bibleOverrides, vlog });
-      for (let tries = 0; used.includes(first.meta.template) && tries < 80; tries++) {
-        seed += 97;
-        first = generateEpisode({ seed, kind, lang: 'en', settings, bibleOverrides, vlog });
-      }
-      used = [...used.filter((id) => id !== first.meta.template), first.meta.template];
+      // a big batch spreads its vlogs evenly; the autopilot's small daily batches draw them at random
+      const next = nextStory(kind, given ? Math.random() < pct : Math.floor((i + 1) * pct) > Math.floor(i * pct), settings, used, seed, repeats);
+      if (!next) continue; // every story has been made and repeats are off: no episode
+      const { template, vlog } = next;
+      used = [...used.filter((id) => id !== template), template];
       langs.forEach((lang, k) => {
-        const ep = lang === 'en' ? first : generateEpisode({ seed, kind, lang, settings, bibleOverrides, templateId: first.meta.template, vlog });
-        items.push({ key: `${kind}-${i}-${lang}`, kind, lang, seed, template: first.meta.template, ...ep.meta, story: ep.story,
-          publishAt: slots[i * langs.length + k], status: 'planned' });
+        const ep = generateEpisode({ seed, kind, lang, settings, bibleOverrides, templateId: template, vlog });
+        items.push({ key: `${kind}-${i}-${lang}`, kind, lang, seed, template, ...ep.meta, story: ep.story,
+          publishAt: slots[i * langs.length + k], status: 'planned', ...(next.repeat ? { repeat: true } : {}) });
       });
     }
   }
   return items;
+}
+
+/**
+ * Autopilot: new episodes for every schedule slot in the next `days` days that has none yet, so the
+ * renderer always has something to make. Returns { items, usedStories, seed, outOf } (items empty when
+ * the plan is already full; outOf: the kinds that ran out of new stories), or null when the autopilot
+ * is off. A kind set to 0 videos in Settings gets none. A story that has been made is not made again
+ * unless the Schedule tab allows repeats.
+ */
+export function topUpPlan(state, now = Date.now()) {
+  const schedule = state.schedule || {};
+  if (!schedule.enabled || schedule.autoPlan === false) return null;
+  const days = Math.min(Math.max(Number(schedule.planDays) || 2, 1), 14);
+  const settings = { ...DEFAULT_SETTINGS, ...state.settings };
+  const langs = settings.languages?.length ? settings.languages : ['en'];
+  const plan = state.plan || [];
+  // a slot is filled when an episode of that kind and language goes up within the hour (a single episode moved a bit still counts)
+  const filled = (kind, lang, t) => plan.some((p) => p.kind === kind && p.lang === lang && p.publishAt && Math.abs(new Date(p.publishAt) - new Date(t)) < 3600e3);
+  const given = {};
+  for (const kind of ['long', 'short']) {
+    given[kind] = [];
+    if ((kind === 'long' ? settings.long?.count : settings.shorts?.count) === 0) continue;
+    // every slot gets one episode per language (all languages go up at the same time)
+    const slots = scheduleSlots(schedule, kind, 60 * days, now).filter((t) => t && new Date(t).getTime() <= now + days * DAY)
+      .filter((t) => langs.some((lang) => !filled(kind, lang, t)));
+    given[kind] = slots.slice(0, 20).flatMap((t) => langs.map(() => t));
+  }
+  const usedStories = structuredClone(state.usedStories || { long: [], short: [] });
+  if (!given.long.length && !given.short.length) return { items: [], usedStories, seed: settings.seed, outOf: [] };
+  let seed;
+  do seed = Math.floor(Math.random() * 99999) + 1; while (seed === settings.seed);
+  const remember = (p) => { if (p.template) usedStories[p.kind] = [...(usedStories[p.kind] || []).filter((id) => id !== p.template), p.template]; };
+  plan.forEach(remember);
+  const made = makePlan({ ...settings, seed }, state.bible, schedule, usedStories, given, schedule.repeatStories === true);
+  const outOf = ['long', 'short'].filter((kind) => made.filter((p) => p.kind === kind).length < given[kind].length);
+  const items = made.map((p) => ({ ...p, key: `${seed}-${p.key}`, auto: true })).filter((p) => !filled(p.kind, p.lang, p.publishAt));
+  items.forEach(remember);
+  return { items, usedStories, seed, outOf };
 }

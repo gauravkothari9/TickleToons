@@ -8,7 +8,9 @@ then a fresh browser for the next one. Runs as the tickletoons-renderer service 
 Graphics run on the CPU here (SwiftShader), so a render is much slower than on a laptop with a GPU.
 
 On Windows it uses Edge with the PC's own graphics card instead, so a PC can be the renderer for the
-AWS server (deploy/local-renderer.ps1 sets that up). The server hands out an episode only when its
+AWS server (deploy/local-renderer.ps1 sets that up). On the GPU instance (deploy/gpu-setup.sh, GPU=1)
+it uses the NVIDIA card through Vulkan, and with EXIT_WHEN_IDLE=1 it switches the machine off once
+nothing is left to render (the main server starts it again when the next episode is due). The server hands out an episode only when its
 publish time is close (Series > Schedule), and YouTube makes it public at that time.
 """
 import ctypes
@@ -25,6 +27,8 @@ SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")
 KEY_FILE = Path(os.environ.get("WORKER_KEY_FILE") or ROOT / "data" / "worker.key")
 LOG_FILE = os.environ.get("LOG_FILE")
 WINDOWS = sys.platform == "win32"
+GPU = os.environ.get("GPU") == "1"
+EXIT_WHEN_IDLE = os.environ.get("EXIT_WHEN_IDLE") == "1"
 IDLE_WAIT = 300          # nothing to do: look again in 5 minutes
 ONE_VIDEO_LIMIT = 12 * 3600 * 1000  # ms; a stuck render is given up after this
 
@@ -45,7 +49,12 @@ def keep_awake(on):
 
 
 def one_episode(p, key):
-    graphics = ["--use-angle=d3d11"] if WINDOWS else ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
+    if WINDOWS:
+        graphics = ["--use-angle=d3d11"]
+    elif GPU:
+        graphics = ["--use-angle=vulkan", "--enable-features=Vulkan", "--disable-vulkan-surface", "--enable-gpu"]
+    else:
+        graphics = ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
     browser = p.chromium.launch(channel="msedge" if WINDOWS else "chromium", headless=True, args=[
         *graphics, "--ignore-gpu-blocklist",
         "--autoplay-policy=no-user-gesture-required", "--disable-background-timer-throttling",
@@ -60,6 +69,11 @@ def one_episode(p, key):
         res = page.goto(f"{SITE_URL}/worker.html", wait_until="load", timeout=120_000)
         if not res or not res.ok:
             raise RuntimeError(f"{SITE_URL}/worker.html answered {res.status if res else 'nothing'} (are the pages deployed?)")
+        if GPU:  # on the CPU a render takes hours: better to say so than to run up the bill
+            gl = page.evaluate("""() => { const g = document.createElement('canvas').getContext('webgl2');
+                const d = g && g.getExtension('WEBGL_debug_renderer_info'); return d ? g.getParameter(d.UNMASKED_RENDERER_WEBGL) : 'no WebGL'; }""")
+            if not any(n in gl for n in ("NVIDIA", "Tesla", "T4")):
+                raise RuntimeError(f"no graphics card in the browser ({gl})")
         # the script sets workerResult = null as soon as it runs; if it never does, it failed to load
         page.wait_for_function("'workerResult' in window", timeout=120_000)
         keep_awake(True)
@@ -84,6 +98,10 @@ def main():
                 result = {"error": str(exc)}
             if result.get("rendered"):
                 time.sleep(5)
+            elif EXIT_WHEN_IDLE:
+                log("Nothing left to render: switching off" if result.get("idle") else "Stopping after a problem: switching off")
+                os.system("sudo /sbin/poweroff")
+                return
             else:
                 time.sleep(IDLE_WAIT if result.get("idle") else 120)
 

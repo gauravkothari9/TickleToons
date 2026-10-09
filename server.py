@@ -124,7 +124,8 @@ VOICES = [
 VOICE_IDS = {v["id"] for v in VOICES}
 
 meta_lock = threading.Lock()
-renders = {}  # video id -> {"proc": Popen, "lock": Lock}
+renders = {}  # video id -> {"proc": Popen, "lock": Lock, "seen": last time the browser sent something}
+RENDER_IDLE_MINUTES = 15  # a render that sends nothing for this long was cut off (PC asleep, tab closed)
 
 
 def find_ffmpeg():
@@ -235,7 +236,7 @@ def start_render(vid, fps):
          "-movflags", "+faststart", str(folder / "picture.mp4")],
         stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=log,
     )
-    renders[vid] = {"proc": proc, "lock": threading.Lock(), "log": log}
+    renders[vid] = {"proc": proc, "lock": threading.Lock(), "log": log, "seen": time.time()}
 
 
 def finish_render(vid):
@@ -278,6 +279,21 @@ def cancel_render(vid):
         job["proc"].kill()
         job["proc"].wait()
         job["log"].close()
+
+
+def drop_abandoned_renders():
+    """A browser that stops in the middle of a render never says so: its entry would stay "rendering"
+    forever, and every retry of the episode added one more. Those are deleted once they go quiet."""
+    while True:
+        time.sleep(60)
+        for vid, job in list(renders.items()):
+            if job["proc"].poll() is None and time.time() - job["seen"] < RENDER_IDLE_MINUTES * 60:
+                continue
+            if (read_meta(vid) or {}).get("status") == "processing":
+                continue  # finish_render has it
+            print(f"[render] {vid}: nothing received for {RENDER_IDLE_MINUTES} minutes, deleted", file=sys.stderr, flush=True)
+            cancel_render(vid)
+            shutil.rmtree(VIDEOS / vid, ignore_errors=True)
 
 
 # ---------- login ----------
@@ -341,9 +357,10 @@ def check_password(password):
 # episode (claim), renders it exactly like the Series page does, and reports back (done). So episodes
 # get made and uploaded while every laptop is off. It signs in with data/worker.key.
 WORKER_KEY_FILE = DATA / "worker.key"
-CLAIM_HOURS = 8          # a render that hasn't reported back by then is tried again
+CLAIM_HOURS = 3          # a render that hasn't reported back by then is tried again (a long one takes ~40 min)
 MAX_SERVER_TRIES = 3
 RENDER_AHEAD_HOURS = 24  # an episode is rendered this long before it goes live (Schedule tab can change it)
+PLAN_KEEP_DAYS = 14      # the autopilot drops episodes from the list this long after their publish time
 
 
 def worker_key():
@@ -365,6 +382,59 @@ def save_series(data):
     tmp = SERIES_FILE.with_suffix(".tmp")
     tmp.write_text(json.dumps(data), encoding="utf-8")
     tmp.replace(SERIES_FILE)
+
+
+def add_planned(items, used_stories, seed):
+    """The autopilot's new episodes (worker.js tops the plan up to the next few days of slots).
+    Each gets the plan's new planRev, so a Series page that loaded the plan before can't drop them on save."""
+    with series_lock:
+        data = load_series()
+        plan = [i for i in data.get("plan") or [] if isinstance(i, dict)]
+        cutoff = time.time() - PLAN_KEEP_DAYS * 86400
+        plan = [i for i in plan if (published_at(i) or cutoff) >= cutoff]
+        taken = {(i.get("kind"), i.get("lang"), i.get("publishAt")) for i in plan}
+        rev = int(data.get("planRev") or 0) + 1
+        added = []
+        for it in items if isinstance(items, list) else []:
+            if not isinstance(it, dict) or not it.get("story") or not it.get("key"):
+                continue
+            slot = (it.get("kind"), it.get("lang"), it.get("publishAt"))
+            if slot in taken or any(i.get("key") == it["key"] for i in plan):
+                continue  # two renderers topped up at once: first one wins
+            taken.add(slot)
+            added.append({**it, "status": "planned", "auto": True, "addedRev": rev})
+        if not added and len(plan) == len(data.get("plan") or []):
+            return 0
+        data["plan"] = plan + added
+        if added:
+            data["planRev"] = rev
+            if isinstance(used_stories, dict):
+                data["usedStories"] = used_stories
+            if isinstance(seed, int):
+                data.setdefault("settings", {})["seed"] = seed
+        save_series(data)
+        return len(added)
+
+
+def keep_auto_episodes(new, old, base_rev):
+    """Episodes the autopilot added after this Series page loaded the plan stay, even though the page doesn't have them."""
+    have = {i.get("key") for i in new.get("plan") or [] if isinstance(i, dict)}
+    kept = [i for i in old.get("plan") or [] if isinstance(i, dict) and i.get("auto")
+            and int(i.get("addedRev") or 0) > base_rev and i.get("key") not in have]
+    new["plan"] = (new.get("plan") or []) + kept
+    used = new.setdefault("usedStories", {"long": [], "short": []})
+    for i in kept:
+        kind = i.get("kind")
+        if i.get("template") and isinstance(used.get(kind), list) and i["template"] not in used[kind]:
+            used[kind].append(i["template"])
+    return kept
+
+
+def published_at(it):
+    try:
+        return datetime.fromisoformat(str(it["publishAt"]).replace("Z", "+00:00")).timestamp()
+    except (KeyError, TypeError, ValueError):
+        return None
 
 
 def same_episode(a, b):
@@ -389,11 +459,18 @@ def keep_server_progress(new, old):
 
 def due(it, now, ahead_hours):
     """Its turn to render: no publish time, or the publish time is less than ahead_hours away (or past)."""
-    try:
-        publish = datetime.fromisoformat(str(it["publishAt"]).replace("Z", "+00:00")).timestamp()
-    except (KeyError, TypeError, ValueError):
-        return True
-    return publish - now <= ahead_hours * 3600
+    publish = published_at(it)
+    return publish is None or publish - now <= ahead_hours * 3600
+
+
+def free_episodes(data, now):
+    """Planned episodes whose turn has come and that no renderer is working on."""
+    ahead = (data.get("schedule") or {}).get("renderAhead")
+    ahead = float(ahead) if isinstance(ahead, (int, float)) and ahead > 0 else RENDER_AHEAD_HOURS
+    return [it for it in data.get("plan") or [] if isinstance(it, dict) and it.get("story") and not it.get("videoId")
+            and it.get("serverTries", 0) < MAX_SERVER_TRIES and due(it, now, ahead)
+            and not (it.get("status") == "rendering"  # pageClaim: a Series page is rendering it ("Render all")
+                     and now - (it.get("serverClaim") or it.get("pageClaim") or now) < CLAIM_HOURS * 3600)]
 
 
 def claim_episode():
@@ -401,11 +478,7 @@ def claim_episode():
     with series_lock:
         data = load_series()
         now = time.time()
-        ahead = (data.get("schedule") or {}).get("renderAhead")
-        ahead = float(ahead) if isinstance(ahead, (int, float)) and ahead > 0 else RENDER_AHEAD_HOURS
-        free = [it for it in data.get("plan") or [] if isinstance(it, dict) and it.get("story") and not it.get("videoId")
-                and it.get("serverTries", 0) < MAX_SERVER_TRIES and due(it, now, ahead)
-                and not (it.get("status") == "rendering" and now - (it.get("serverClaim") or now) < CLAIM_HOURS * 3600)]
+        free = free_episodes(data, now)
         if not free:
             return None, data
         it = min(free, key=lambda i: (i.get("publishAt") or "9999", data["plan"].index(i)))
@@ -428,6 +501,42 @@ def finish_episode(key, seed, video_id=None, error=None):
             it.update(status="failed" if it["serverTries"] >= MAX_SERVER_TRIES else "planned", error=str(error or "")[:300])
         save_series(data)
         return True
+
+
+# ---------- the GPU renderer on AWS (deploy/aws-gpu-provision.mjs) ----------
+# A g4dn instance tagged app=tickletoons-gpu that is stopped while there is nothing to do. When an
+# episode's turn comes, this server starts it; its render_worker renders everything due and switches it off.
+GPU_TAG = "tickletoons-gpu"
+GPU_CHECK_SECONDS = 300
+GPU_RESTART_MINUTES = 30  # never start it again sooner (a machine that keeps failing must not run up the bill)
+
+
+def gpu_wake():
+    try:
+        import boto3
+    except ImportError:
+        return
+    region = os.environ.get("AWS_REGION", "ap-south-1")
+    last_start = 0.0
+    while True:
+        time.sleep(GPU_CHECK_SECONDS)
+        try:
+            with series_lock:
+                waiting = free_episodes(load_series(), time.time())
+            if not waiting or time.time() - last_start < GPU_RESTART_MINUTES * 60:
+                continue
+            ec2 = boto3.client("ec2", region_name=region)
+            found = [i for r in ec2.describe_instances(Filters=[{"Name": "tag:app", "Values": [GPU_TAG]}])["Reservations"]
+                     for i in r["Instances"] if i["State"]["Name"] != "terminated"]
+            if not found:
+                return  # no GPU renderer set up: nothing to do, ever
+            if found[0]["State"]["Name"] == "stopped":
+                ec2.start_instances(InstanceIds=[found[0]["InstanceId"]])
+                last_start = time.time()
+                print(f"[gpu] {len(waiting)} episode(s) due: started {found[0]['InstanceId']}", file=sys.stderr, flush=True)
+        except Exception as exc:  # no AWS rights yet, no capacity right now, network: try again later
+            print(f"[gpu] {str(exc)[:300]}", file=sys.stderr, flush=True)
+            last_start = time.time()
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -670,15 +779,22 @@ class Handler(SimpleHTTPRequestHandler):
                 rev = data.get("rev", 0)
                 if isinstance(rev, (int, float)) and isinstance(old_rev, (int, float)) and rev < old_rev:
                     return self.send_json({"ok": True, "stale": True})
+                base = data.pop("baseRev", None)
+                kept = keep_auto_episodes(data, old, int(base)) if isinstance(base, (int, float)) else []
+                data["planRev"] = old.get("planRev", 0)
                 keep_server_progress(data, old)
                 tmp = SERIES_FILE.with_suffix(".tmp")
                 tmp.write_text(json.dumps(data), encoding="utf-8")
                 tmp.replace(SERIES_FILE)
-            return self.send_json({"ok": True})
+            return self.send_json({"ok": True, "planRev": data["planRev"], "kept": kept, "usedStories": data.get("usedStories")})
 
         if path == "/api/worker/claim":
             it, data = claim_episode()
             return self.send_json({"item": it, "youtube": data.get("youtube") or {}, "connected": YT.status()["connected"]})
+
+        if path == "/api/worker/plan":
+            d = self.read_json() or {}
+            return self.send_json({"added": add_planned(d.get("items"), d.get("usedStories"), d.get("seed"))})
 
         if path == "/api/worker/done":
             d = self.read_json() or {}
@@ -734,6 +850,7 @@ class Handler(SimpleHTTPRequestHandler):
             job = renders.get(vid)
             if not job:
                 return self.send_json({"error": "No active render"}, 404)
+            job["seen"] = time.time()
             if action == "frames":
                 body = self.read_body()
                 if not body:
@@ -791,6 +908,8 @@ def main():
             full.update(status="failed", note="Server stopped during render.")
             write_meta(meta["id"], full)
 
+    threading.Thread(target=drop_abandoned_renders, daemon=True).start()
+    threading.Thread(target=gpu_wake, daemon=True).start()
     worker_key()  # made once; deploy/render_worker.py signs in with it
     server = Server(("127.0.0.1", PORT), Handler)
     url = f"http://127.0.0.1:{PORT}"

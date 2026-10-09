@@ -160,6 +160,9 @@ class YouTube:
         }
         with self.lock:
             q = self._load(self.queue_file, [])
+            for e in q:  # asked twice (two renderers, a second click): the same video never goes up twice
+                if e.get("videoId") == vid and e.get("status") != "failed":
+                    return e
             q.append(entry)
             self._save(self.queue_file, q)
         self.wake.set()

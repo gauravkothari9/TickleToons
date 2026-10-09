@@ -40,6 +40,11 @@ Open **📺 Series** (`/series.html`):
 - **YouTube**: one-time Google setup (steps on the page), then uploads are automatic and scheduled.
 - **Automatic rendering**: run `deploy\local-renderer.ps1` once on a PC with a graphics card; it renders each episode
   shortly before its publish time (Schedule tab) and the server uploads it, scheduled. See `deploy/DEPLOY.md`.
+- **Autopilot** (Schedule tab, on by default): the renderer also writes the episodes. It keeps the next 2 days of
+  slots filled with new stories, so e.g. every day ticked for long episodes plus three Short times means 1 long + 3 Shorts
+  a day, written, rendered and uploaded with nobody pressing anything. A story that has been made is never made
+  again: when a kind runs out of stories it stops (the Schedule tab shows how many are left) unless you allow
+  repeats there. A kind set to 0 videos in Settings is left out.
 
 Stories come from hand-written templates in `web/js/series/` (no AI): `stories-long.js` and `stories-long-2.js`
 (one complete story each, one genre, with its own optional scenes that are cut when an episode would run long; nothing
